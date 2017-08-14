@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 
+
 void insert_label_node(char *label, sym_pt *head) {
     int strcmp_result;
     if (*head == 0) {

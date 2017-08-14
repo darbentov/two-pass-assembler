@@ -10,6 +10,7 @@ void print_error(error_code err, int line_number) {
             printf("line %d: Syntax error. \n", line_number);
             break;
         case LABEL_WITH_NO_DATA_ERROR:
+
             printf("Line %d: line should contain more than a label.\n", line_number);
             break;
         case LABEL_ALREADY_EXISTS_ERROR:

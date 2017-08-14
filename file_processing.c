@@ -129,10 +129,6 @@ int process_line_first_pass(char *line) {
         int temp = 0;
         int is_label = 0;
 
-        line = strip_blank_chars(line);
-
-        if (!line)
-            return 0;
 
         /*___________________________________*/
 
