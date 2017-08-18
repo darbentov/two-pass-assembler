@@ -1,3 +1,5 @@
+#include "utils.h"
+
 #ifndef ASSEMBLER_OPCODE_H
 #define ASSEMBLER_OPCODE_H
 
@@ -7,26 +9,46 @@
 #define MAX_OPCODE_NAME 10
 #define MAX_OPCODE_BITS 4
 
-enum {
-    OPS_2, OP_1, NO_OP
-};
+typedef enum {
+    IMMEDIATE_ADDRESSING, DIRECT_ADDRESSING, MATRIX_ADRESSING, REGISTER_ADDRESSING, NO_ADDRESSING
+} addressing_t;
+
+typedef struct addressing_types {
+    unsigned int immediate_addressing:1;
+    unsigned int direct_addressing:1;
+    unsigned int matrix_addressing:1;
+    unsigned int register_addressing:1;
+} allowed_addressing_bitfields;
+
+
+typedef struct Opcode *opcode_pt;
 
 typedef struct Opcode {             /* Opcode node. it will be in an hash list, and opcodes with the same hash will be in a linked list */
     char name[MAX_OPCODE_NAME];
     char code[MAX_OPCODE_BITS];
-    enum op_type;
-    Opcode *next;
+    allowed_addressing_bitfields *source_addressing_types;
+    allowed_addressing_bitfields *target_addressing_types;
+    opcode_pt next;
 
 } Opcode;
 
-Opcode *hash_table[OPCODES_COUNT] = {NULL};
+opcode_pt get_opcode(char *op_name);
 
-int getHashIndex(char *name);
+int get_opcode_hash_index(char *name);
 
 void init_opcode_hash_table();
 
 void insertOpCodeNode(Opcode *node, int index);
 
-void insertIntoHashMap(Opcode *Node);
+void insert_opcode_into_hash_table(Opcode *Node);
 
-Opcode *getOpcodeNode(char *op);
+addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfields *allowed_addressings, int lines_count);
+
+addressing_t get_addressing_by_operand(char *operand, int lines_count);
+
+bool is_addressing_in_allowed_addressings(addressing_t addressing, allowed_addressing_bitfields *allowed_addressings);
+
+int get_words_count_by_addressing(addressing_t addressing);
+
+
+

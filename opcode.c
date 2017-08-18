@@ -1,23 +1,38 @@
-Opcode mov = {'mov', '0000', OPS_2};
-Opcode cmp = {'cmp', '0001', OPS_2};
-Opcode add = {'add', '0010', OPS_2};
-Opcode sub = {'sub', '0011', OPS_2};
-Opcode not = {'not', '0100', OP_1};
-Opcode clr = {'clr', '0101', OP_1};
-Opcode lea = {'lea', '0110', OPS_2};
-Opcode inc = {'inc', '0111', OP_1};
-Opcode dec = {'dec', '1000', OP_1};
-Opcode jmp = {'jmp', '1001', OP_1};
-Opcode bne = {'bne', '1010', OP_1};
-Opcode red = {'red', '1011', OP_1};
-Opcode prn = {'prn', '1100', OP_1};
-Opcode jsr = {'jsr', '1101', OP_1};
-Opcode rts = {'rts', '1110', NO_OP};
-Opcode stop = {'stop', '1111', NO_OP};
+#include "opcode.h"
+#include "error_handling.h"
+#include "constants.h"
+#include "keywords.h"
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
-int getHashIndex(char *name) {
+static opcode_pt hash_table[OPCODES_COUNT] = {NULL};
+
+allowed_addressing_bitfields g1 = {1, 1, 1, 1};
+allowed_addressing_bitfields g2 = {0, 1, 1, 1};
+allowed_addressing_bitfields g3 = {0, 1, 1, 0};
+
+Opcode mov  = {"mov" , "0000", &g1 , &g2 };
+Opcode cmp  = {"cmp" , "0001", &g1 , &g1 };
+Opcode add  = {"add" , "0010", &g1 , &g2 };
+Opcode sub  = {"sub" , "0011", &g1 , &g2 };
+Opcode not  = {"not" , "0100", NULL, &g2 };
+Opcode clr  = {"clr" , "0101", NULL, &g2 };
+Opcode lea  = {"lea" , "0110", &g3 , &g2 };
+Opcode inc  = {"inc" , "0111", NULL, &g2 };
+Opcode dec  = {"dec" , "1000", NULL, &g2 };
+Opcode jmp  = {"jmp" , "1001", NULL, &g2 };
+Opcode bne  = {"bne" , "1010", NULL, &g2 };
+Opcode red  = {"red" , "1011", NULL, &g2 };
+Opcode prn  = {"prn" , "1100", NULL, &g1 };
+Opcode jsr  = {"jsr" , "1101", NULL, &g2 };
+Opcode rts  = {"rts" , "1110", NULL, NULL};
+Opcode stop = {"stop", "1111", NULL, NULL};
+
+int get_opcode_hash_index(char *name) {
     int sum;
     char c;
+    sum = 0;
     while ((c = *(name++))) {
         sum += c;
     }
@@ -25,57 +40,95 @@ int getHashIndex(char *name) {
 }
 
 void init_opcode_hash_table() {
-    insertOpCodeNode(&mov);
-    insertOpCodeNode(&cmp);
-    insertOpCodeNode(&add);
-    insertOpCodeNode(&sub);
-    insertOpCodeNode(&not);
-    insertOpCodeNode(&clr);
-    insertOpCodeNode(&lea);
-    insertOpCodeNode(&inc);
-    insertOpCodeNode(&dec);
-    insertOpCodeNode(&jmp);
-    insertOpCodeNode(&bne);
-    insertOpCodeNode(&red);
-    insertOpCodeNode(&prn);
-    insertOpCodeNode(&jsr);
-    insertOpCodeNode(&rts);
-    insertOpCodeNode(&stop);
+    insert_opcode_into_hash_table(&mov);
+    insert_opcode_into_hash_table(&cmp);
+    insert_opcode_into_hash_table(&add);
+    insert_opcode_into_hash_table(&sub);
+    insert_opcode_into_hash_table(&not);
+    insert_opcode_into_hash_table(&clr);
+    insert_opcode_into_hash_table(&lea);
+    insert_opcode_into_hash_table(&inc);
+    insert_opcode_into_hash_table(&dec);
+    insert_opcode_into_hash_table(&jmp);
+    insert_opcode_into_hash_table(&bne);
+    insert_opcode_into_hash_table(&red);
+    insert_opcode_into_hash_table(&prn);
+    insert_opcode_into_hash_table(&jsr);
+    insert_opcode_into_hash_table(&rts);
+    insert_opcode_into_hash_table(&stop);
 }
 
-void insertOpCodeNode(Opcode *node, int index) {
-    if (hash_table[index] == NULL) {
+
+void insert_opcode_into_hash_table(opcode_pt node) {
+    int index = get_opcode_hash_index(node->name);
+    if (!hash_table[index]) {
         hash_table[index] = node;
         node->next = NULL;
     } else {
-        Opcode *temp = hash_table[index];
-        while (temp->next != NULL) {
+        opcode_pt temp = hash_table[index];
+        while (temp->next) {
             temp = temp->next;
         }
-        temp->next = Node;
-        Node->next = NULL;
+        temp->next = node;
+        node->next = NULL;
     }
 }
 
-void insertIntoHashMap(Opcode *Node) {
-    int index = getHashIndex(Node->name);
-    insertOpCodeNode(Node, index);
-}
 
-Opcode *getOpcodeNode(char *op) {
-    Opcode *temp = NULL;
-    int index = getHashIndex(op);
-    if (hash_table[index] != NULL) {
+opcode_pt get_opcode(char *op_name) {
+    opcode_pt temp = NULL;
+    int index = get_opcode_hash_index(op_name);
+    if (hash_table[index]) {
         temp = hash_table[index];
-        while (strcmp(temp->name, op) && temp != NULL) {
+        while (strcmp(temp->name, op_name) && temp) {
             temp = temp->next;
         }
     }
 
-    if (temp == NULL) {
-        printf("Opcode '%s' was not found!", op);
-        return NULL;
-    } else {
-        return temp;
+    return temp;
+}
+
+
+addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfields *allowed_addressings, int lines_count) {
+    addressing_t addressing;
+    addressing = get_addressing_by_operand(operand, lines_count);
+    if (is_addressing_in_allowed_addressings(addressing, allowed_addressings)){
+        return addressing;
+    }
+    return NO_ADDRESSING;
+}
+
+addressing_t get_addressing_by_operand(char *operand, int lines_count){
+    if (*operand == '#'){
+        char *ptr;
+        long num;
+        num = strtol(operand, &ptr, DECIMAL_BASE);
+        if (!*ptr){
+            return IMMEDIATE_ADDRESSING;
+        }
+        else {
+            handle_error(INVALID_INSTRUCTION_OPERAND_ERROR, lines_count);
+            return NO_ADDRESSING;
+        }
+    }
+    else if (isalpha(*operand)){
+        if (is_register(operand)){
+            return REGISTER_ADDRESSING;
+        }
+
+        else if (is_matrix(operand)){
+            return MATRIX_ADRESSING;
+        }
+        else if (label_is_valid(operand, strlen(operand), lines_count)){
+            return DIRECT_ADDRESSING;
+        }
+        else {
+            return NO_ADDRESSING;
+        }
+
+    }
+    else {
+        handle_error(INVALID_INSTRUCTION_OPERAND_ERROR, lines_count);
+        return NO_ADDRESSING;
     }
 }

@@ -3,9 +3,13 @@
 
 #endif //ASSEMBLER_KEYWORDS_H
 
-#include "symbol_tree.h"
+#include "symbols.h"
 #include <stdlib.h>
 #include <string.h>
+
+typedef enum {
+    NOT_A_KEYWORD, OPCODE, DIRECTIVE, REGISTER
+} keyword_type;
 
 typedef struct keyword *keyword_p;
 
@@ -13,14 +17,18 @@ typedef struct keyword {
     char *value;
     keyword_p left;
     keyword_p right;
-} keyword;
+} Keyword;
 
 
 void insert_keyword(char *value, keyword_p *head);
 
 void init_keywords_list();
 
-int is_keyword(char *word);
+short int is_directive(char *word);
 
-int search(char *word, keyword_p node);
+short int is_register(char *word);
+
+short int is_opcode(char *word);
+
+keyword_p search(char *word, keyword_p node);
 
