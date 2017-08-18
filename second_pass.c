@@ -82,20 +82,23 @@ void process_instruction_second_pass(char *token, int *IC_pt) {
     enum bool is_action = TRUE;
     enum bool is_external = FALSE;
     cur_opcode = get_opcode(token);
+    char *target_operand;
+    char *source_operand;
     addressing_t source_addressing, target_addressing;
     source_addressing = target_addressing = NO_ADDRESSING;
-
+    words_count = 1;
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
-            words_count = handle_instruction_operand(cur_opcode->source_addressing_types, operand, *IC_pt + 1);
+            source_operand = strtok(NULL, ",");
+            source_addressing = get_addressing_and_validate(source_operand, cur_opcode->source_addressing_types, lines_count);
+
         }
-        handle_instruction_operand(cur_opcode->target_addressing_types, operand);
+        target_operand = strtok(NULL, ",");
+        target_addressing = get_addressing_and_validate(target_operand, cur_opcode->target_addressing_types, lines_count);
+        build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand, *IC_pt);
     }
 
-    operand = strtok(NULL, ",");
-    if (operand) {
-        handle_error(TOO_MANY_OPERANDS, lines_count);
-    }
+    *IC_pt += words_count;
 
 
 }

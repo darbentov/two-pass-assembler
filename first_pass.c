@@ -175,6 +175,7 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
     enum bool is_action = TRUE;
     enum bool is_external = FALSE;
     addressing_t source_addressing, target_addressing;
+    source_addressing = target_addressing = NO_ADDRESSING;
     int words_count;
     cur_opcode = get_opcode(field);
     if (!cur_opcode) {
@@ -190,13 +191,12 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
         if (cur_opcode->source_addressing_types) {
             operand = strtok(NULL, ",");
             source_addressing = get_addressing_and_validate(operand, cur_opcode->source_addressing_types, lines_count);
-            words_count += get_words_count_by_addressing(source_addressing);
         }
         operand = strtok(NULL, ",");
         target_addressing = get_addressing_and_validate(operand, cur_opcode->target_addressing_types, lines_count);
-        words_count += get_words_count_by_addressing(target_addressing);
-
     }
+
+    words_count += get_words_count_by_both_addressings(source_addressing, target_addressing);
 
     operand = strtok(NULL, ",");
     if (operand) {

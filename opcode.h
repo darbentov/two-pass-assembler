@@ -48,7 +48,11 @@ addressing_t get_addressing_by_operand(char *operand, int lines_count);
 
 bool is_addressing_in_allowed_addressings(addressing_t addressing, allowed_addressing_bitfields *allowed_addressings);
 
-int get_words_count_by_addressing(addressing_t addressing);
+int get_words_count_by_both_addressings(addressing_t source_addressing, addressing_t target_addressing);
+
+void build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char *source_operand,
+                      addressing_t target_addressing, char *target_operand, int IC);
+
 
 
 
