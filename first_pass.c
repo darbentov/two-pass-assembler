@@ -190,9 +190,17 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
             operand = strtok(NULL, ",");
+            if (!operand){
+                handle_error(TOO_FEW_OPERANDS_ERROR, lines_count);
+                return;
+            }
             source_addressing = get_addressing_and_validate(operand, cur_opcode->source_addressing_types, lines_count);
         }
         operand = strtok(NULL, ",");
+        if (!operand){
+            handle_error(TOO_FEW_OPERANDS_ERROR, lines_count);
+            return;
+        }
         target_addressing = get_addressing_and_validate(operand, cur_opcode->target_addressing_types, lines_count);
     }
 

@@ -13,6 +13,10 @@ typedef enum {
     IMMEDIATE_ADDRESSING, DIRECT_ADDRESSING, MATRIX_ADRESSING, REGISTER_ADDRESSING, NO_ADDRESSING
 } addressing_t;
 
+typedef enum {
+    ABSOLUTE_CODING_TYPE, EXTERNAL_CODING_TYPE, RELOCATABLE_CODING_TYPE
+} coding_type_enum;
+
 typedef struct addressing_types {
     unsigned int immediate_addressing:1;
     unsigned int direct_addressing:1;
@@ -51,7 +55,7 @@ bool is_addressing_in_allowed_addressings(addressing_t addressing, allowed_addre
 int get_words_count_by_both_addressings(addressing_t source_addressing, addressing_t target_addressing);
 
 void build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char *source_operand,
-                      addressing_t target_addressing, char *target_operand, int IC);
+                      addressing_t target_addressing, char *target_operand, int lines_count, int IC);
 
 
 

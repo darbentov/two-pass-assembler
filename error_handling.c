@@ -65,17 +65,17 @@ void handle_error(error_code err, int line_number) {
         case ENTRY_OPERAND_LABEL_DOES_NOT_EXIST_ERROR:
             printf("Line %d: entry points to a label that does not exist in the file.\n", line_number);
             break;
-        case 40:
-            printf("line %d: label cannot be a directive. \n", line_number);
+        case LABEL_DOES_NOT_EXIST_ERROR:
+            printf("line %d: label does not exist.\n", line_number);
             break;
-        case 41:
-            printf("line %d: Previously defined label. \n", line_number);
+        case ADDRESSING_NOT_ALLOWED_ERROR:
+            printf("Line %d: Illegal addressing.\n", line_number);
             break;
         case 62:
 
             break;
         case 74:
-            printf("line %d: unrecognized insruction. \n", line_number);
+            printf("line %d: unrecognized instruction. \n", line_number);
             break;
 
         case 50:
@@ -89,7 +89,7 @@ void handle_error(error_code err, int line_number) {
             printf("line %d: label cannot be an instruction.\n", line_number);
             break;
         case 112:
-            printf("Line %d: Illegal addressing, check operands. \n", line_number);
+
             break;
         case 131:
             printf("Line %d: label cannot be a register \n", line_number);
@@ -110,6 +110,7 @@ void handle_error(error_code err, int line_number) {
     }
 
 }
+
 
 
 /*---------------- write_error2 ------------------------
@@ -144,4 +145,3 @@ int write_error2(int line_number, char *line) {
     }
     return -13; /* late */
 }
-

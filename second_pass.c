@@ -95,7 +95,7 @@ void process_instruction_second_pass(char *token, int *IC_pt) {
         }
         target_operand = strtok(NULL, ",");
         target_addressing = get_addressing_and_validate(target_operand, cur_opcode->target_addressing_types, lines_count);
-        build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand, *IC_pt);
+        build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand, lines_count, *IC_pt);
     }
 
     *IC_pt += words_count;
