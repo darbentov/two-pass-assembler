@@ -1,0 +1,41 @@
+assembler: main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o
+	gcc -Wall -ansi -pedantic main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o -o assembler
+
+main.o:	main.c
+	gcc -c -Wall -ansi -pedantic main.c -o main.o
+
+file_processing.o: file_processing.c
+	gcc -c -Wall -ansi -pedantic file_processing.c -o file_processing.o -I.
+
+first_pass.o: first_pass.c
+	gcc -c -Wall -ansi -pedantic first_pass.c -o first_pass.o -I.
+
+second_pass.o: second_pass.c
+	gcc -c -Wall -ansi -pedantic second_pass.c -o second_pass.o -I.
+
+error_handling.o: errorHandler.c
+	gcc -c -Wall -ansi -pedantic error_handling.c -o error_handling.o -I.
+
+symbols.o: symbols.c
+	gcc -c -Wall -ansi -pedantic symbols.c -o symbols.o -I.
+
+data.o: data.c
+	gcc -c -Wall -ansi -pedantic data.c -o data.o -I.
+
+entry_table.o: entry_table.c
+	gcc -c -Wall -ansi -pedantic entry_table.c -o entry_table.o -I.
+
+opcode.o: opcode.c
+	gcc -c -Wall -ansi -pedantic opcode.c -o opcode.o -I.
+
+extern_table.o: entry_table.c
+	gcc -c -Wall -ansi -pedantic extern_table.c -o extern_table.o -I.
+
+utils.o: utils.c
+    gcc -c -Wall -ansi -pedantic utils.c -o utils.o -I.
+
+directives.o: directives.c
+    gcc -c -Wall -ansi -pedantic directives.c -o directives.o -I.
+
+keywords.o: keywords.o
+    gcc -c -Wall -ansi -pedantic keywords.c -o keywords.o -I

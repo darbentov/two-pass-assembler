@@ -1,16 +1,8 @@
-//
-// Created by Dar Bentov on 12/8/17.
-//
-
 #ifndef ASSEMBLER_DIRECTIVES_H
 #define ASSEMBLER_DIRECTIVES_H
 
-#endif //ASSEMBLER_DIRECTIVES_H
 
-#include <stdlib.h>
-#include <string.h>
 #define NOT_EXISTS_DIRECTIVE_TYPE -1
-
 #define DATA_DIRECTIVE_TYPE 1
 #define MAT_DIRECTIVE_TYPE 2
 #define STRING_DIRECTIVE_TYPE 3
@@ -34,3 +26,4 @@ static directive directives[] = {
 
 int find_directive_type(char *directive_name);
 
+#endif

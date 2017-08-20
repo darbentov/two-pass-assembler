@@ -1,11 +1,13 @@
 #include "first_pass.h"
-#include "file_processing.h"
 #include <ctype.h>
 #include "symbols.h"
 #include "constants.h"
 #include "keywords.h"
+#include "error_handling.h"
 
-sym_pt head = NULL;
+static sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt head);
+
+sym_pt symbol_head = NULL;
 
 sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_action) {
     sym_pt new_node;
@@ -21,7 +23,7 @@ sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_ac
 }
 
 void insert_symbol(sym_pt new_node) {
-    insert_symbol_after_node(new_node, &head);
+    insert_symbol_after_node(new_node, &symbol_head);
 }
 
 void insert_symbol_after_node(sym_pt new_node, sym_pt *head) {
@@ -29,17 +31,15 @@ void insert_symbol_after_node(sym_pt new_node, sym_pt *head) {
     if (!(*head)) {
         *head = new_node;
     } else if ((strcmp_result = strcmp(new_node->label, (*head)->label)) > 0) {
-        return insert_symbol_after_node(new_node, &((*head)->right));
+        insert_symbol_after_node(new_node, &((*head)->right));
     } else if (strcmp_result < 0) {
-        return insert_symbol_after_node(new_node, &((*head)->left));
-    } else {
-        return;
+        insert_symbol_after_node(new_node, &((*head)->left));
     }
 }
 
 
 sym_pt search_symbol_by_label(char *label){
-    return search_symbol_by_label_from_given_node(label, head);
+    return search_symbol_by_label_from_given_node(label, symbol_head);
 }
 
 sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt node) {
@@ -79,7 +79,7 @@ char *get_label(char *line, int lines_count) {
 }
 
 bool label_is_valid(char *label, size_t label_length, int lines_count) {
-
+    char c;
     if (label_length > MAX_LABEL) {
         handle_error(LABEL_TOO_LONG_ERROR, lines_count);
         return FALSE;
@@ -89,13 +89,13 @@ bool label_is_valid(char *label, size_t label_length, int lines_count) {
         return FALSE;
     }
 
-    while (*label++) {
-        if (!isdigit(*label) && !isalpha(*label)) {
+    while ((c = *label++)) {
+        if (!isalnum(c)) {
+            printf("invalid character: '%c', int repr: %d\n", c, (int)c);
             handle_error(LABEL_CONTAINS_INVALID_CHARACTER_ERROR, lines_count);
             return FALSE;
         }
     }
-
 
     if (is_opcode(label)) {
         handle_error(LABEL_IS_OPCODE_ERROR, lines_count);
@@ -109,4 +109,34 @@ bool label_is_valid(char *label, size_t label_length, int lines_count) {
     }
 
     return TRUE;
+}
+
+void increment_symbol_addresses_by_ic(int IC){
+    increment_symbol_addresses_by_ic_from_given_node(symbol_head, IC);
+}
+
+void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC){
+    if (symbol) {
+        if (!symbol->is_action && !symbol->is_external){
+            symbol->address += IC;
+        }
+        increment_symbol_addresses_by_ic_from_given_node(symbol->right, IC);
+        increment_symbol_addresses_by_ic_from_given_node(symbol->left, IC);
+
+    }
+}
+
+
+void clean_symbol_table(){
+    clean_symbol_table_from_given_node(symbol_head);
+}
+
+void clean_symbol_table_from_given_node(sym_pt symbol){
+    if (symbol){
+        clean_symbol_table_from_given_node(symbol->right);
+        clean_symbol_table_from_given_node(symbol->left);
+        symbol->right = NULL;
+        symbol->left = NULL;
+        free(symbol);
+    }
 }

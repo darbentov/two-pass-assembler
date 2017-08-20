@@ -1,9 +1,8 @@
 #ifndef ASSEMBLER_ERROR_HANDLING_H
 #define ASSEMBLER_ERROR_HANDLING_H
 
-#endif /* ASSEMBLER_ERROR_HANDLING_H */
+
 typedef enum error_code {
-    EMPTY_ERROR, /* for better use, the enum will start from 1, so we put here an empty error.*/
     SYNTAX_ERROR,
     LABEL_WITH_NO_DATA_ERROR,
     LABEL_ALREADY_EXISTS_ERROR,
@@ -24,8 +23,16 @@ typedef enum error_code {
     STRING_MUST_BE_ENCLOSED_BY_QUOTES_ERROR,
     ENTRY_OPERAND_LABEL_DOES_NOT_EXIST_ERROR,
     LABEL_DOES_NOT_EXIST_ERROR,
-    ADDRESSING_NOT_ALLOWED_ERROR
+    ADDRESSING_NOT_ALLOWED_ERROR,
+    OPCODE_NOT_FOUND_ERROR,
+    TOO_FEW_OPERANDS_ERROR,
+    TOO_MANY_OPERANDS,
+    INVALID_INSTRUCTION_OPERAND_ERROR,
+    MATRIX_INDEX_MUST_BE_REGISTERS_ERROR,
+    INVALID_MATRIX_DECLARATION
 
 } error_code;
 
 void handle_error(error_code err, int line_number);
+
+#endif /* ASSEMBLER_ERROR_HANDLING_H */

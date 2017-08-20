@@ -1,15 +1,10 @@
 #ifndef ASSEMBLER_KEYWORDS_H
 #define ASSEMBLER_KEYWORDS_H
 
-#endif //ASSEMBLER_KEYWORDS_H
-
 #include "symbols.h"
 #include <stdlib.h>
 #include <string.h>
 
-typedef enum {
-    NOT_A_KEYWORD, OPCODE, DIRECTIVE, REGISTER
-} keyword_type;
 
 typedef struct keyword *keyword_p;
 
@@ -32,3 +27,4 @@ short int is_opcode(char *word);
 
 keyword_p search(char *word, keyword_p node);
 
+#endif

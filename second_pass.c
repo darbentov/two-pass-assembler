@@ -39,24 +39,26 @@ char label[MAX_LABEL];
  * 8.  IC = IC + L.
  * 9.  Go back to step 2.
  * 10. If errors found, stop.
- * 11. Create and save the output files: .ob file, .ext file (if needed), .ent file (if needed).
  *
  * Done!
  */
 
 void second_pass(FILE *fp){
+
     char line[MAX_CODE_LINE];
     char *line_p;
     char *token;
     int IC;
+    IC = 0;
     while (fgets(line, MAX_CODE_LINE, fp)) {
         lines_count++;
         line_p = line;
+        printf("Working on line: %s", line_p);
         while (isspace(*line_p)) {
             line_p++;
         }
         token = strtok(line_p, BLANK_CHARACTER_SEPERATOR);
-        if (is_comment_or_empty(token))
+        if (!token || is_comment_or_empty(token))
             continue;
         process_line_second_pass(token, &IC);
     }
@@ -71,6 +73,7 @@ void process_line_second_pass(char *token, int *IC_pt) {
         process_directive_second_pass(token);
     }
     else {
+        printf("Second pass: found instruction. current IC: %d\n", *IC_pt);
         process_instruction_second_pass(token, IC_pt);
     }
 }
@@ -79,27 +82,27 @@ void process_instruction_second_pass(char *token, int *IC_pt) {
 
     opcode_pt cur_opcode;
     int words_count;
-    enum bool is_action = TRUE;
-    enum bool is_external = FALSE;
-    cur_opcode = get_opcode(token);
     char *target_operand;
     char *source_operand;
     addressing_t source_addressing, target_addressing;
-    source_addressing = target_addressing = NO_ADDRESSING;
+    cur_opcode = get_opcode(token);
+    source_addressing = NO_ADDRESSING;
+    source_operand = NULL;
     words_count = 1;
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
-            source_operand = strtok(NULL, ",");
+            source_operand = strtok(NULL, " \n,");
             source_addressing = get_addressing_and_validate(source_operand, cur_opcode->source_addressing_types, lines_count);
 
         }
-        target_operand = strtok(NULL, ",");
+        target_operand = strtok(NULL, " \n,");
         target_addressing = get_addressing_and_validate(target_operand, cur_opcode->target_addressing_types, lines_count);
+        printf("source addressing: %d\n", source_addressing);
+        printf("target addressing: %d\n", target_addressing);
         build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand, lines_count, *IC_pt);
     }
 
     *IC_pt += words_count;
-
 
 }
 

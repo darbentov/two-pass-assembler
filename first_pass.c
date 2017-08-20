@@ -4,9 +4,8 @@
 #include "keywords.h"
 #include "data.h"
 #include "directives.h"
-#include "opcode.h"
 #include "constants.h"
-#include "symbols.h"
+#include "error_handling.h"
 
 extern int err_count;
 int lines_count;
@@ -66,15 +65,16 @@ void first_pass(FILE *fp) {
     char *line_p;
     char *token;
     int IC, DC;
-
+    IC = DC = 0;
     while (fgets(line, MAX_CODE_LINE, fp)) {
         lines_count++;
         line_p = line;
+        printf("Working on line: %s", line_p);
         while (isspace(*line_p)) {
             line_p++;
         }
         token = strtok(line_p, BLANK_CHARACTER_SEPERATOR);
-        if (is_comment_or_empty(token))
+        if (!token || is_comment_or_empty(token))
             continue;
         process_line_first_pass(token, &DC, &IC);
     }
@@ -117,6 +117,7 @@ void process_line_first_pass(char *field, int *DC, int *IC) {
         }
 
         if (*field == '.') { /* means that this is a direcive */
+            printf("found directive: %s\n", field);
             field++; /* skip '.' */
             process_directive_first_pass(field, is_label, DC);
         } else { /* if not a directive, then it is instruction */
@@ -125,6 +126,12 @@ void process_line_first_pass(char *field, int *DC, int *IC) {
     }
 }
 
+void insert_extern_to_symbol_table(char *label){
+    if (label_is_valid(label, strlen(label), lines_count)){
+        sym_pt symbol_node = create_symbol_node(label, 0, TRUE, FALSE);
+        insert_symbol(symbol_node);
+    }
+}
 
 void process_directive_first_pass(char *field, int is_label, int *DC) {
     int directive_type;
@@ -132,7 +139,8 @@ void process_directive_first_pass(char *field, int is_label, int *DC) {
         handle_error(EMPTY_DIRECTIVE_ERROR, lines_count);
     }
     directive_type = find_directive_type(field);
-    field = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
+    printf("directive type: %d\n", directive_type);
+
     if (directive_type == NOT_EXISTS_DIRECTIVE_TYPE) {
         handle_error(NOT_EXISTS_DIRECTIVE_ERROR, lines_count);
     }
@@ -140,7 +148,8 @@ void process_directive_first_pass(char *field, int is_label, int *DC) {
     if (directive_type == ENTRY_DIRECTIVE_TYPE) {
         return;
     } else if (directive_type == EXTERN_DIRECTIVE_TYPE) {
-        insert_extern(field);
+        field = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
+        insert_extern_to_symbol_table(field);
     } else {
         if (is_label) {
             sym_pt symbol_node = create_symbol_node(label, *DC, FALSE, FALSE);
@@ -148,10 +157,14 @@ void process_directive_first_pass(char *field, int is_label, int *DC) {
         }
 
         if (directive_type == DATA_DIRECTIVE_TYPE) {
+            field = strtok(NULL, ", \n\r\t");
+            printf("found .data directive. next field: %s\n", field);
             insert_numbers_to_data(field, lines_count, DC);
         } else if (directive_type == STRING_DIRECTIVE_TYPE) {
+            field = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
             insert_string_to_data(field, lines_count, DC);
         } else if (directive_type == MAT_DIRECTIVE_TYPE) {
+            field = strtok(NULL, ", \n\r\t");
             insert_matrix_to_data(field, lines_count, DC);
         }
     }
@@ -159,14 +172,6 @@ void process_directive_first_pass(char *field, int is_label, int *DC) {
 
 }
 
-void insert_extern(char *field) {
-    if (label_is_valid(field, strlen(field), lines_count)) {
-
-        sym_pt symbol_node = create_symbol_node(label, 0, TRUE, FALSE);
-        insert_symbol(symbol_node);
-    };
-
-}
 
 
 void process_instruction_first_pass(char *field, int is_label, int *IC) {
@@ -175,13 +180,15 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
     enum bool is_action = TRUE;
     enum bool is_external = FALSE;
     addressing_t source_addressing, target_addressing;
-    source_addressing = target_addressing = NO_ADDRESSING;
     int words_count;
+
+    source_addressing = target_addressing = NO_ADDRESSING;
     cur_opcode = get_opcode(field);
     if (!cur_opcode) {
-        handle_error(OPCODE_NOT_FOUND, lines_count);
+        handle_error(OPCODE_NOT_FOUND_ERROR, lines_count);
         return;
     }
+    printf("Opcode: %s\n", cur_opcode->name);
     if (is_label) {
         sym_pt symbol_node = create_symbol_node(label, *IC, is_external, is_action);
         insert_symbol(symbol_node);
@@ -189,14 +196,15 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
     words_count = 1;
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
-            operand = strtok(NULL, ",");
+            operand = strtok(NULL, " \n,");
+            printf("source operand: %s\n", operand);
             if (!operand){
                 handle_error(TOO_FEW_OPERANDS_ERROR, lines_count);
                 return;
             }
             source_addressing = get_addressing_and_validate(operand, cur_opcode->source_addressing_types, lines_count);
         }
-        operand = strtok(NULL, ",");
+        operand = strtok(NULL, " \n,");
         if (!operand){
             handle_error(TOO_FEW_OPERANDS_ERROR, lines_count);
             return;
@@ -206,7 +214,7 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
 
     words_count += get_words_count_by_both_addressings(source_addressing, target_addressing);
 
-    operand = strtok(NULL, ",");
+    operand = strtok(NULL, " \n,");
     if (operand) {
         handle_error(TOO_MANY_OPERANDS, lines_count);
         return;

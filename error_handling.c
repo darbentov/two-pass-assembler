@@ -71,77 +71,24 @@ void handle_error(error_code err, int line_number) {
         case ADDRESSING_NOT_ALLOWED_ERROR:
             printf("Line %d: Illegal addressing.\n", line_number);
             break;
-        case 62:
-
+        case OPCODE_NOT_FOUND_ERROR:
+            printf("Line %d: opcode not found.\n", line_number);
             break;
-        case 74:
-            printf("line %d: unrecognized instruction. \n", line_number);
+        case TOO_FEW_OPERANDS_ERROR:
+            printf("Line %d: too few operands for given opcode.\n", line_number);
             break;
-
-        case 50:
-            printf("line %d: To many characters for one line. The number of characters per line must be less than 80.\n",
-                   line_number);
+        case TOO_MANY_OPERANDS:
+            printf("Line %d: too many operands for given opcode.\n", line_number);
             break;
-        case 101:
-            printf("line %d: bad argument[s]\n", line_number);
+        case INVALID_INSTRUCTION_OPERAND_ERROR:
+            printf("Line %d: invalid operand for instruction.\n", line_number);
             break;
-        case 111:
-            printf("line %d: label cannot be an instruction.\n", line_number);
+        case MATRIX_INDEX_MUST_BE_REGISTERS_ERROR:
+            printf("Line %d: matrix indexes must be registers.\n", line_number);
             break;
-        case 112:
-
-            break;
-        case 131:
-            printf("Line %d: label cannot be a register \n", line_number);
-            break;
-        case 114:
-            printf("Line %d:no character[s] between the quotation marks ", line_number);
-            break;
-
-        case 116:
-
-        case 117:
-            printf("Line %d: cannot define label as external. ", line_number);
-            printf("label already defined as internal.\n");
-            break;
-        case 118:
-            printf("Line %d: Error: expecting argument...\n", line_number);
+        case INVALID_MATRIX_DECLARATION:
+            printf("Line %d: invalid matrix declaration.\n", line_number);
             break;
     }
 
-}
-
-
-
-/*---------------- write_error2 ------------------------
-write_error2: This function uses the global variable
-             "error" to determine whether an error
-	         should be written to the screen.
---------------------------------------------------------
-*/
-int write_error2(int line_number, char *line) {
-
-    switch (error) {
-        case 1:
-            printf("Line %d: unrecognized label \n", line_number);
-            break;
-        case 2:
-            printf("Line %d: Error: expecting argument... \n", line_number);
-            break;
-        case 3:
-            printf("Line %d: To few actual argument[s] \n", line_number);
-            break;
-        case 4:
-            printf("Line %d: misseing quotation[s] character on .string directive", line_number);
-            break;
-        case 5:
-            line = skipspace(line);
-            line = nextfield(line);
-            if (line == NULL)
-                return 0;
-            printf("Line %d: file has no internal label name \"%s\" ", line_number, line);
-            break;
-
-    }
-    return -13; /* late */
 }

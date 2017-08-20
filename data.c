@@ -4,6 +4,7 @@
 #include "constants.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 /*This file contains functions which handle the data list*/
 
 /*pointer to the first node*/
@@ -13,12 +14,11 @@ static Data_pt data_head = NULL;
 /*This function takes a string as a parameter, and splits it into tokens of whole numbers.
 if the string recieved is null, it will add an error. otherwise, it will loop through the string's
 tokens and send each one to the insert_single_number function*/
-int insert_numbers_to_data(char *token, int line_number, int *DC) {
+void insert_numbers_to_data(char *token, int line_number, int *DC) {
     /*if the token is null*/
-    if (!(token = strtok(NULL, " ,\t\n"))) {
+    if (!token) {
         /*add error and return*/
         handle_error(DATA_DIRECTIVE_WITH_NO_DATA_ERROR, line_number);
-        return BAD_EXIT_STATUS;
     }
         /*if token is not null*/
     else {
@@ -171,4 +171,33 @@ void clean_data() {
 Data_pt get_data_head() {
     Data_pt tmp = data_head;
     return tmp;
+}
+
+
+int insert_matrix_to_data(char *token, int line_number, int *DC){
+    int matrix_data_count;
+    matrix_data_count = get_data_count_from_matrix_declaration(token, line_number);
+    while (matrix_data_count--){
+        token = strtok(NULL, " ,\t\n");
+        if (!token){
+            token = "0";
+        }
+        insert_single_number(token, line_number, DC);
+    }
+    return 1;
+}
+
+bool is_data_empty(){
+    return (bool) (count_all_data() == 0);
+}
+
+void write_data_to_ob_file(FILE *fp){
+    char word[WORD_SIZE];
+    Data_pt ptr = data_head;
+    while (ptr){
+        int_to_bin(ptr->address, word, WORD_SIZE);
+        fputs(word, fp);
+        fputc('\n', fp);
+        ptr = ptr->next;
+    }
 }

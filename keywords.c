@@ -1,12 +1,5 @@
-//
-// Created by Dar Bentov on 12/8/17.
-//
-
 #include "keywords.h"
-
-
-
-static keyword_p keywords_head = NULL;
+#include <stdio.h>
 
 static keyword_p registers_head = NULL;
 static keyword_p opcodes_head = NULL;
@@ -32,10 +25,10 @@ void init_keywords_list() {
     insert_keyword("hlt", &opcodes_head);
 
 
-    insert_keyword("data"  , &directives_head);
+    insert_keyword("data", &directives_head);
     insert_keyword("string", &directives_head);
-    insert_keyword("mat"   , &directives_head);
-    insert_keyword("entry" , &directives_head);
+    insert_keyword("mat", &directives_head);
+    insert_keyword("entry", &directives_head);
     insert_keyword("extern", &directives_head);
 
 
@@ -66,23 +59,27 @@ void insert_keyword(char *value, keyword_p *head) {
     }
 }
 
-short int is_register(char *word){
-    return search(word, registers_head) != NULL;
+short int is_register(char *word) {
+    keyword_p key;
+    key = search(word, registers_head);
+    return key != NULL;
 }
 
-short int is_opcode(char *word){
+short int is_opcode(char *word) {
     return search(word, opcodes_head) != NULL;
 }
-short int is_directive(char *word){
+
+short int is_directive(char *word) {
     return search(word, directives_head) != NULL;
 }
 
 keyword_p search(char *word, keyword_p node) {
     int strcmp_result;
-    if (node != 0) {
-        if ((strcmp_result = strcmp(word, node->value)) == 0) {
+    if (node) {
+        strcmp_result = strcmp(word, node->value);
+        if (strcmp_result == 0) {
             return node;
-        } else if (strcmp_result > 1) {
+        } else if (strcmp_result > 0) {
             return search(word, node->right);
         } else {
             return search(word, node->left);

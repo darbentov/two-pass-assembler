@@ -1,6 +1,5 @@
 #ifndef ASSEMBLER_ENTRY_TABLE_H
 #define ASSEMBLER_ENTRY_TABLE_H
-#endif //ASSEMBLER_ENTRY_TABLE_H
 
 typedef struct entry *entry_pt;
 
@@ -12,3 +11,6 @@ typedef struct entry {
 
 void insert_entry(char *label, int address);
 
+void clean_entry_table();
+
+#endif

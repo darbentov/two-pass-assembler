@@ -1,13 +1,15 @@
+#include <stdio.h>
 #include "utils.h"
 
 #ifndef ASSEMBLER_OPCODE_H
 #define ASSEMBLER_OPCODE_H
 
-#endif /* ASSEMBLER_OPCODE_H */
 
 #define OPCODES_COUNT 16
 #define MAX_OPCODE_NAME 10
 #define MAX_OPCODE_BITS 4
+
+#define MAX_INSTRUCTIONS_LINES 256
 
 typedef enum {
     IMMEDIATE_ADDRESSING, DIRECT_ADDRESSING, MATRIX_ADRESSING, REGISTER_ADDRESSING, NO_ADDRESSING
@@ -58,5 +60,9 @@ void build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char
                       addressing_t target_addressing, char *target_operand, int lines_count, int IC);
 
 
+void clean_code();
 
+bool is_code_empty();
+void write_code_to_ob_file(FILE *fp);
 
+#endif /* ASSEMBLER_OPCODE_H */
