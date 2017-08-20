@@ -1,5 +1,4 @@
 #include <ctype.h>
-#include "file_processing.h"
 #include "first_pass.h"
 #include "keywords.h"
 #include "data.h"
@@ -12,7 +11,8 @@ int lines_count_first_pass = 0;
 char *label;
 
 
-addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfields *allowed_addressings, int lines_count);
+addressing_t
+get_addressing_and_validate(char *operand, allowed_addressing_bitfields *allowed_addressings, int lines_count);
 
 /*
  * First Pass Algorithm
@@ -103,11 +103,10 @@ void process_line_first_pass(char *field, int *DC, int *IC) {
         label = get_label(field, lines_count_first_pass);
         if (label) {
             field = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
-            if (search_symbol_by_label(label)){
+            if (search_symbol_by_label(label)) {
                 handle_error(LABEL_ALREADY_EXISTS_ERROR, lines_count_first_pass);
                 is_label = FALSE;
-            }
-            else {
+            } else {
                 is_label = TRUE;
                 if (!field) {
                     handle_error(LABEL_WITH_NO_DATA_ERROR, lines_count_first_pass);
@@ -125,8 +124,8 @@ void process_line_first_pass(char *field, int *DC, int *IC) {
     }
 }
 
-void insert_extern_to_symbol_table(char *label){
-    if (label_is_valid(label, strlen(label), lines_count_first_pass)){
+void insert_extern_to_symbol_table(char *label) {
+    if (label_is_valid(label, strlen(label), lines_count_first_pass)) {
         sym_pt symbol_node = create_symbol_node(label, 0, TRUE, FALSE);
         insert_symbol(symbol_node);
     }
@@ -170,7 +169,6 @@ void process_directive_first_pass(char *field, int is_label, int *DC) {
 }
 
 
-
 void process_instruction_first_pass(char *field, int is_label, int *IC) {
     opcode_pt cur_opcode;
     char *operand;
@@ -193,18 +191,20 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
             operand = strtok(NULL, " \n,");
-            if (!operand){
+            if (!operand) {
                 handle_error(TOO_FEW_OPERANDS_ERROR, lines_count_first_pass);
                 return;
             }
-            source_addressing = get_addressing_and_validate(operand, cur_opcode->source_addressing_types, lines_count_first_pass);
+            source_addressing = get_addressing_and_validate(operand, cur_opcode->source_addressing_types,
+                                                            lines_count_first_pass);
         }
         operand = strtok(NULL, " \n,");
-        if (!operand){
+        if (!operand) {
             handle_error(TOO_FEW_OPERANDS_ERROR, lines_count_first_pass);
             return;
         }
-        target_addressing = get_addressing_and_validate(operand, cur_opcode->target_addressing_types, lines_count_first_pass);
+        target_addressing = get_addressing_and_validate(operand, cur_opcode->target_addressing_types,
+                                                        lines_count_first_pass);
     }
 
     words_count += get_words_count_by_both_addressings(source_addressing, target_addressing);

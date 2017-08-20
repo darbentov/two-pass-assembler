@@ -23,16 +23,16 @@ void process_file(char *filename) {
     FILE *fp;
     fp = open_file(filename, READ_MODE, AS_EXTENSION);
     printf("Processing file: %s%s\n", filename, AS_EXTENSION);
-    if (!fp){
+    if (!fp) {
         return;
     }
     first_pass(fp);
     fseek(fp, 0, 0);
-    if (!err_count){
+    if (!err_count) {
         second_pass(fp);
     }
     fclose(fp);
-    if (!err_count){
+    if (!err_count) {
         generate_output_files(filename);
     }
     clean_symbol_table();
@@ -44,13 +44,13 @@ void process_file(char *filename) {
 }
 
 void generate_output_files(char *filename) {
-    if (!is_code_empty() || !is_data_empty()){
+    if (!is_code_empty() || !is_data_empty()) {
         write_ob_file(filename);
     }
-    if (!is_extern_empty()){
+    if (!is_extern_empty()) {
         write_extern_file(filename);
     }
-    if (!is_entry_empty()){
+    if (!is_entry_empty()) {
         write_entry_file(filename);
     }
 }
@@ -70,7 +70,7 @@ void write_counts_to_ob_file(FILE *fp) {
     char data_count[8 + 1];
     char instructions_count_4base[(8 / 2) + 1];
     char data_count_4_base[(8 / 2) + 1];
-    
+
     int_to_bin(get_data_count(), data_count, 8);
     bin_to_4base(data_count, data_count_4_base, 8);
     int_to_bin(get_insrtuctions_count(), instructions_count, 8);
@@ -80,4 +80,3 @@ void write_counts_to_ob_file(FILE *fp) {
     fputs(data_count_4_base, fp);
     fputc(LINE_BREAK, fp);
 }
-

@@ -43,7 +43,7 @@ char label[MAX_LABEL];
  * Done!
  */
 
-void second_pass(FILE *fp){
+void second_pass(FILE *fp) {
 
     char line[MAX_CODE_LINE];
     char *line_p;
@@ -65,14 +65,13 @@ void second_pass(FILE *fp){
 }
 
 void process_line_second_pass(char *token, int *IC_pt) {
-    if (get_label(token,lines_count_second_pass)){
+    if (get_label(token, lines_count_second_pass)) {
         token = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
     }
-    if (*token == '.'){
+    if (*token == '.') {
         token++;
         process_directive_second_pass(token);
-    }
-    else {
+    } else {
         process_instruction_second_pass(token, IC_pt);
     }
 }
@@ -89,13 +88,16 @@ void process_instruction_second_pass(char *token, int *IC_pt) {
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
             source_operand = strtok(NULL, " \n,");
-            source_addressing = get_addressing_and_validate(source_operand, cur_opcode->source_addressing_types, lines_count_second_pass);
+            source_addressing = get_addressing_and_validate(source_operand, cur_opcode->source_addressing_types,
+                                                            lines_count_second_pass);
 
         }
         target_operand = strtok(NULL, " \n,");
-        target_addressing = get_addressing_and_validate(target_operand, cur_opcode->target_addressing_types, lines_count_second_pass);
+        target_addressing = get_addressing_and_validate(target_operand, cur_opcode->target_addressing_types,
+                                                        lines_count_second_pass);
     }
-    *IC_pt += build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand, lines_count_second_pass, *IC_pt);
+    *IC_pt += build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand,
+                               lines_count_second_pass, *IC_pt);
 
 }
 
@@ -109,7 +111,7 @@ void process_directive_second_pass(char *token) {
         return;
     }
     symbol = search_symbol_by_label(token);
-    if (!symbol){
+    if (!symbol) {
         handle_error(ENTRY_OPERAND_LABEL_DOES_NOT_EXIST_ERROR, lines_count_second_pass);
         return;
     }

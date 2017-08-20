@@ -6,7 +6,9 @@
 #include "error_handling.h"
 
 static sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt head);
+
 static void print_all_symbols_from_given_node(sym_pt symbol);
+
 sym_pt symbol_head = NULL;
 
 sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_action) {
@@ -38,7 +40,7 @@ void insert_symbol_after_node(sym_pt new_node, sym_pt *head) {
 }
 
 
-sym_pt search_symbol_by_label(char *label){
+sym_pt search_symbol_by_label(char *label) {
     return search_symbol_by_label_from_given_node(label, symbol_head);
 }
 
@@ -110,13 +112,13 @@ bool label_is_valid(char *label, size_t label_length, int lines_count) {
     return TRUE;
 }
 
-void increment_symbol_addresses_by_ic(int IC){
+void increment_symbol_addresses_by_ic(int IC) {
     increment_symbol_addresses_by_ic_from_given_node(symbol_head, IC);
 }
 
-void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC){
+void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC) {
     if (symbol) {
-        if (!symbol->is_action && !symbol->is_external){
+        if (!symbol->is_action && !symbol->is_external) {
             symbol->address += IC;
         }
         increment_symbol_addresses_by_ic_from_given_node(symbol->right, IC);
@@ -126,13 +128,13 @@ void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC){
 }
 
 
-void clean_symbol_table(){
+void clean_symbol_table() {
     clean_symbol_table_from_given_node(symbol_head);
     symbol_head = NULL;
 }
 
-void clean_symbol_table_from_given_node(sym_pt symbol){
-    if (symbol){
+void clean_symbol_table_from_given_node(sym_pt symbol) {
+    if (symbol) {
         clean_symbol_table_from_given_node(symbol->right);
         clean_symbol_table_from_given_node(symbol->left);
         symbol->right = NULL;
@@ -141,12 +143,12 @@ void clean_symbol_table_from_given_node(sym_pt symbol){
     }
 }
 
-void print_all_symbols(){
+void print_all_symbols() {
     print_all_symbols_from_given_node(symbol_head);
 }
 
-static void print_all_symbols_from_given_node(sym_pt symbol){
-    if (symbol){
+static void print_all_symbols_from_given_node(sym_pt symbol) {
+    if (symbol) {
         printf("symbol: %s\n", symbol->label);
         print_all_symbols_from_given_node(symbol->right);
         print_all_symbols_from_given_node(symbol->left);

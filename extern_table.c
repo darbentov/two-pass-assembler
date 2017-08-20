@@ -1,9 +1,7 @@
 #include "extern_table.h"
-#include "utils.h"
 #include "constants.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 static extern_pt extern_head = NULL;
 static short int extern_count;
@@ -42,17 +40,17 @@ void clean_extern_table() {
     extern_count = 0;
 }
 
-bool is_extern_empty(){
+bool is_extern_empty() {
     return (bool) (extern_count == 0);
 }
 
-void write_extern_file(char *filename){
+void write_extern_file(char *filename) {
     FILE *fp;
     char address[9], address_4_base[5];
     fp = open_file(filename, WRITE_MODE, EXTERN_EXTENSION);
     extern_pt tmp;
     tmp = extern_head;
-    while (tmp){
+    while (tmp) {
         int_to_bin(tmp->address, address, 8);
         bin_to_4base(address, address_4_base, 8);
         fputs(tmp->label, fp);

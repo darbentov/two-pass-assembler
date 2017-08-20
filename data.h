@@ -13,23 +13,32 @@
 #define QUOTATION_MARK '\"'
 typedef struct Data *Data_pt;
 
-typedef struct Data
-{
+typedef struct Data {
 
-    short int address;
+    int address;
     int value;
     Data_pt next;
 } Data;
 
 
 void insert_new_data(int *DC, short num);
+
 void insert_single_number(char *number, int line_number, int *DC);
+
 void insert_numbers_to_data(char *token, int line_number, int *DC);
+
 int insert_string_to_data(char *string, int line_number, int *DC);
+
 int insert_matrix_to_data(char *token, int line_number, int *DC);
+
 void increment_data_addresses_by_ic(int DC);
+
 void clean_data();
+
 bool is_data_empty();
+
 void write_data_to_ob_file(FILE *fp);
+
 short get_data_count();
+
 #endif

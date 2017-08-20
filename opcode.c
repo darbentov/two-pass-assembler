@@ -113,7 +113,7 @@ addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfi
     if (is_addressing_in_allowed_addressings(addressing, allowed_addressings)) {
         return addressing;
     }
-    if (addressing != NO_ADDRESSING){
+    if (addressing != NO_ADDRESSING) {
         handle_error(ADDRESSING_NOT_ALLOWED_ERROR, lines_count);
     }
     return NO_ADDRESSING;
@@ -129,11 +129,10 @@ addressing_t get_addressing_by_operand(char *operand, int lines_count) {
         if (*ptr) {
             handle_error(INVALID_NUMBER_ERROR, lines_count);
             return NO_ADDRESSING;
-        } else if (num > MAX_IMMIDIATE_NUM || num < MIN_IMMIDIATE_NUM){
+        } else if (num > MAX_IMMIDIATE_NUM || num < MIN_IMMIDIATE_NUM) {
             handle_error(NUMBER_OUT_OF_RANGE_ERROR, lines_count);
             return NO_ADDRESSING;
-        }
-        else {
+        } else {
             return IMMEDIATE_ADDRESSING;
         }
     } else if (isalpha(*operand)) {
@@ -182,7 +181,8 @@ int build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char 
     } else {
         words_count += build_operand_instruction_line(source_addressing, source_operand, FALSE, IC + words_count,
                                                       lines_count);
-        words_count += build_operand_instruction_line(target_addressing, target_operand, TRUE, IC + words_count, lines_count);
+        words_count += build_operand_instruction_line(target_addressing, target_operand, TRUE, IC + words_count,
+                                                      lines_count);
     }
     return words_count;
 
@@ -222,7 +222,7 @@ int build_operand_instruction_line(addressing_t addressing, char *operand, bool 
             } else {
                 value = symbol->address;
                 coding_type = get_coding_type_from_symbol(symbol);
-                if (coding_type == EXTERNAL_CODING_TYPE){
+                if (coding_type == EXTERNAL_CODING_TYPE) {
                     insert_extern(symbol->label, IC);
                 }
             }
@@ -250,9 +250,8 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     size_t i;
     char row_register[3];
     char col_register[3];
-    int res;
     i = 0;
-    while (*word_p && *word_p != '['){
+    while (*word_p && *word_p != '[') {
         i++;
         word_p++;
     }
@@ -262,7 +261,7 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     sscanf(operand, "[%[^]]][ %[^]]]", row_register, col_register);
     sym_pt symbol;
     symbol = search_symbol_by_label(mat_name);
-    if (!symbol){
+    if (!symbol) {
         handle_error(LABEL_DOES_NOT_EXIST_ERROR, line_number);
         return;
     }
@@ -326,10 +325,10 @@ void build_instruction_line(opcode_pt cur_opcode, addressing_t source_addressing
 
 }
 
-void clean_code(){
+void clean_code() {
     int i = 0;
     char *word;
-    for (i = 0; i < MAX_INSTRUCTIONS_LINES; i++){
+    for (i = 0; i < MAX_INSTRUCTIONS_LINES; i++) {
         word = instructions[i];
         free(word);
         instructions[i] = NULL;
@@ -337,37 +336,37 @@ void clean_code(){
     instructions_count = 0;
 }
 
-bool is_addressing_in_allowed_addressings(addressing_t addressing, allowed_addressing_bitfields *allowed_addressings){
+bool is_addressing_in_allowed_addressings(addressing_t addressing, allowed_addressing_bitfields *allowed_addressings) {
     return (bool) ((addressing == IMMEDIATE_ADDRESSING && allowed_addressings->immediate_addressing) ||
-            (addressing == DIRECT_ADDRESSING && allowed_addressings->direct_addressing) ||
-            (addressing == REGISTER_ADDRESSING && allowed_addressings->register_addressing) ||
-            (addressing == MATRIX_ADRESSING && allowed_addressings->matrix_addressing));
+                   (addressing == DIRECT_ADDRESSING && allowed_addressings->direct_addressing) ||
+                   (addressing == REGISTER_ADDRESSING && allowed_addressings->register_addressing) ||
+                   (addressing == MATRIX_ADRESSING && allowed_addressings->matrix_addressing));
 }
 
-bool is_code_empty(){
+bool is_code_empty() {
     return (bool) (instructions_count == 0);
 }
 
-void write_code_to_ob_file(FILE *fp){
+void write_code_to_ob_file(FILE *fp) {
     int i;
     char address[9];
     char address_4_base[5];
     char value_4_base[6];
-    for (i = 0; i < 256; i++){
+    for (i = 0; i < 256; i++) {
 
-        if (!instructions[i]){
+        if (!instructions[i]) {
             break;
         }
         int_to_bin(i + START_IC, address, 8);
         bin_to_4base(address, address_4_base, 8);
         bin_to_4base(instructions[i], value_4_base, 10);
         fputs(address_4_base, fp);
-        fputc(TAB_SEPERATOR,fp);
+        fputc(TAB_SEPERATOR, fp);
         fputs(value_4_base, fp);
         fputc(LINE_BREAK, fp);
     }
 }
 
-short int get_insrtuctions_count(){
+short int get_insrtuctions_count() {
     return instructions_count;
 }

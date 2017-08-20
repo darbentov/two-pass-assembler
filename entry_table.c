@@ -1,9 +1,7 @@
 #include "entry_table.h"
-#include "utils.h"
 #include "constants.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 entry_pt entry_head = NULL;
 static short int entry_count;
@@ -49,13 +47,13 @@ void clean_entry_table() {
     entry_count = 0;
 }
 
-void write_entry_file(char *filename){
+void write_entry_file(char *filename) {
     FILE *fp;
     char address[9], address_4_base[5];
     fp = open_file(filename, WRITE_MODE, ENTRY_EXTENSION);
     entry_pt tmp;
     tmp = entry_head;
-    while (tmp){
+    while (tmp) {
         int_to_bin(tmp->address, address, 8);
         bin_to_4base(address, address_4_base, 8);
         fputs(tmp->label, fp);
@@ -68,6 +66,6 @@ void write_entry_file(char *filename){
 
 }
 
-bool is_entry_empty(){
+bool is_entry_empty() {
     return (bool) (entry_count == 0);
 }

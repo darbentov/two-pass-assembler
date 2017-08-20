@@ -16,5 +16,7 @@ void insert_entry(char *label, int address);
 void clean_entry_table();
 
 void write_entry_file(char *filename);
+
 bool is_entry_empty();
+
 #endif

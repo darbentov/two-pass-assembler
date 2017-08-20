@@ -45,11 +45,10 @@ int get_opcode_hash_index(char *name);
 
 void init_opcode_hash_table();
 
-void insertOpCodeNode(Opcode *node, int index);
-
 void insert_opcode_into_hash_table(Opcode *Node);
 
-addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfields *allowed_addressings, int lines_count);
+addressing_t
+get_addressing_and_validate(char *operand, allowed_addressing_bitfields *allowed_addressings, int lines_count);
 
 addressing_t get_addressing_by_operand(char *operand, int lines_count);
 
@@ -64,6 +63,9 @@ int build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char 
 void clean_code();
 
 bool is_code_empty();
+
 void write_code_to_ob_file(FILE *fp);
+
 short int get_insrtuctions_count();
+
 #endif /* ASSEMBLER_OPCODE_H */

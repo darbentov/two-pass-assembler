@@ -1,5 +1,4 @@
 #include "keywords.h"
-#include <stdio.h>
 
 static keyword_p registers_head = NULL;
 static keyword_p opcodes_head = NULL;

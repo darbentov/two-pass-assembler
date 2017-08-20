@@ -1,10 +1,8 @@
 #include "data.h"
 #include "error_handling.h"
-#include "utils.h"
 #include "constants.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <ctype.h>
 /*This file contains functions which handle the data list*/
 
@@ -92,7 +90,7 @@ void insert_new_data(int *DC, short num) {/*create new pointer to data, allocate
 int insert_string_to_data(char *string, int line_number, int *DC) {
     char c;
     /* check if string is empty */
-    while (string && isspace(*string)){
+    while (string && isspace(*string)) {
         string++;
     }
     if (!string) {
@@ -112,11 +110,9 @@ int insert_string_to_data(char *string, int line_number, int *DC) {
     if (c != QUOTATION_MARK) {
         handle_error(STRING_MUST_BE_ENCLOSED_BY_QUOTES_ERROR, line_number);
         return BAD_EXIT_STATUS;
-    }
-    else {
-        c = *string;
+    } else {
         while ((c = *string++)) {
-            if (!isspace(c)){
+            if (!isspace(c)) {
                 handle_error(EXTRA_CHARACTERS_AFTER_STRING_DECLARARTION_ERROR, line_number);
                 return BAD_EXIT_STATUS;
             }
@@ -169,50 +165,44 @@ void clean_data() {
     data_count = 0;
 }
 
-/*return pointer to data_head. used when exporting files*/
-Data_pt get_data_head() {
-    Data_pt tmp = data_head;
-    return tmp;
-}
 
-
-int insert_matrix_to_data(char *token, int line_number, int *DC){
+int insert_matrix_to_data(char *token, int line_number, int *DC) {
     int matrix_data_count;
     matrix_data_count = get_data_count_from_matrix_declaration(token, line_number);
-    if (matrix_data_count == 0){
+    if (matrix_data_count == 0) {
         return 1;
     }
-    while (matrix_data_count-- > 0){
+    while (matrix_data_count-- > 0) {
         token = strtok(NULL, " ,\t\n");
-        if (!token){
+        if (!token) {
             token = "0";
         }
         insert_single_number(token, line_number, DC);
     }
     token = strtok(NULL, " ,\t\n");
-    if (token){
+    if (token) {
         handle_error(TOO_MANY_NUMBERS_FOR_MAT, line_number);
     }
     return 1;
 }
 
-bool is_data_empty(){
+bool is_data_empty() {
     return (bool) (data_count == 0);
 }
 
-void write_data_to_ob_file(FILE *fp){
+void write_data_to_ob_file(FILE *fp) {
     char word[WORD_SIZE];
     char address[9];
     char address_4_base[5];
     char value_4_base[6];
     Data_pt ptr = data_head;
-    while (ptr){
+    while (ptr) {
         int_to_bin(ptr->address, address, 8);
         int_to_bin(ptr->value, word, WORD_SIZE - 1);
         bin_to_4base(address, address_4_base, 8);
         bin_to_4base(word, value_4_base, 10);
         fputs(address_4_base, fp);
-        fputc(TAB_SEPERATOR,fp);
+        fputc(TAB_SEPERATOR, fp);
         fputs(value_4_base, fp);
         fputc(LINE_BREAK, fp);
         ptr = ptr->next;
