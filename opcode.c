@@ -223,7 +223,7 @@ int build_operand_instruction_line(addressing_t addressing, char *operand, bool 
                 value = symbol->address;
                 coding_type = get_coding_type_from_symbol(symbol);
                 if (coding_type == EXTERNAL_CODING_TYPE) {
-                    insert_extern(symbol->label, IC);
+                    insert_extern(symbol->label, IC + START_IC);
                 }
             }
 

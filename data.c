@@ -140,7 +140,7 @@ void increment_data_addresses_by_ic(int IC) {
     }
     /*go through every node and assign it an address*/
     while (ptr) {
-        ptr->address = IC;
+        ptr->address += IC + START_IC;
         /*increment the address to be assigned to the next node*/
         IC++;
         ptr = ptr->next;

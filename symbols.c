@@ -119,9 +119,12 @@ void increment_symbol_addresses_by_ic(int IC) {
 void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC) {
     if (symbol) {
         if (!symbol->is_action && !symbol->is_external) {
-            symbol->address += IC;
+            symbol->address += IC + START_IC;
         }
-        increment_symbol_addresses_by_ic_from_given_node(symbol->right, IC);
+        else if (symbol->is_action){
+            symbol->address += START_IC;
+        }
+        increment_symbol_addresses_by_ic_from_given_node(symbol->right, IC );
         increment_symbol_addresses_by_ic_from_given_node(symbol->left, IC);
 
     }

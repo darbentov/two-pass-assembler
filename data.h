@@ -15,7 +15,7 @@ typedef struct Data *Data_pt;
 
 typedef struct Data {
 
-    int address;
+    unsigned int address;
     int value;
     Data_pt next;
 } Data;
