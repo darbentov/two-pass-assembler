@@ -6,7 +6,7 @@
 #include "error_handling.h"
 
 static sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt head);
-
+static void print_all_symbols_from_given_node(sym_pt symbol);
 sym_pt symbol_head = NULL;
 
 sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_action) {
@@ -47,7 +47,7 @@ sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt node) {
     if (node != 0) {
         if ((strcmp_result = strcmp(label, node->label)) == 0) {
             return node;
-        } else if (strcmp_result > 1) {
+        } else if (strcmp_result > 0) {
             return search_symbol_by_label_from_given_node(label, node->right);
         } else {
             return search_symbol_by_label_from_given_node(label, node->left);
@@ -91,7 +91,6 @@ bool label_is_valid(char *label, size_t label_length, int lines_count) {
 
     while ((c = *label++)) {
         if (!isalnum(c)) {
-            printf("invalid character: '%c', int repr: %d\n", c, (int)c);
             handle_error(LABEL_CONTAINS_INVALID_CHARACTER_ERROR, lines_count);
             return FALSE;
         }
@@ -138,5 +137,17 @@ void clean_symbol_table_from_given_node(sym_pt symbol){
         symbol->right = NULL;
         symbol->left = NULL;
         free(symbol);
+    }
+}
+
+void print_all_symbols(){
+    print_all_symbols_from_given_node(symbol_head);
+}
+
+static void print_all_symbols_from_given_node(sym_pt symbol){
+    if (symbol){
+        printf("symbol: %s\n", symbol->label);
+        print_all_symbols_from_given_node(symbol->right);
+        print_all_symbols_from_given_node(symbol->left);
     }
 }

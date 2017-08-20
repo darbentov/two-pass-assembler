@@ -8,7 +8,7 @@
 #include "error_handling.h"
 
 extern int err_count;
-int lines_count;
+int lines_count_first_pass = 0;
 char *label;
 
 
@@ -66,10 +66,10 @@ void first_pass(FILE *fp) {
     char *token;
     int IC, DC;
     IC = DC = 0;
+    lines_count_first_pass = 0;
     while (fgets(line, MAX_CODE_LINE, fp)) {
-        lines_count++;
+        lines_count_first_pass++;
         line_p = line;
-        printf("Working on line: %s", line_p);
         while (isspace(*line_p)) {
             line_p++;
         }
@@ -94,30 +94,29 @@ void process_line_first_pass(char *field, int *DC, int *IC) {
 
         /* first character can either be a dot or a letter. */
         if (!(isalpha(*field) || *field == '.')) {
-            handle_error(SYNTAX_ERROR, lines_count);
+            handle_error(SYNTAX_ERROR, lines_count_first_pass);
             return;
         }
         /*************** Dealing with Label *******************/
 
 
-        label = get_label(field, lines_count);
+        label = get_label(field, lines_count_first_pass);
         if (label) {
             field = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
             if (search_symbol_by_label(label)){
-                handle_error(LABEL_ALREADY_EXISTS_ERROR, lines_count);
+                handle_error(LABEL_ALREADY_EXISTS_ERROR, lines_count_first_pass);
                 is_label = FALSE;
             }
             else {
                 is_label = TRUE;
                 if (!field) {
-                    handle_error(LABEL_WITH_NO_DATA_ERROR, lines_count);
+                    handle_error(LABEL_WITH_NO_DATA_ERROR, lines_count_first_pass);
                     return;
                 }
             }
         }
 
         if (*field == '.') { /* means that this is a direcive */
-            printf("found directive: %s\n", field);
             field++; /* skip '.' */
             process_directive_first_pass(field, is_label, DC);
         } else { /* if not a directive, then it is instruction */
@@ -127,7 +126,7 @@ void process_line_first_pass(char *field, int *DC, int *IC) {
 }
 
 void insert_extern_to_symbol_table(char *label){
-    if (label_is_valid(label, strlen(label), lines_count)){
+    if (label_is_valid(label, strlen(label), lines_count_first_pass)){
         sym_pt symbol_node = create_symbol_node(label, 0, TRUE, FALSE);
         insert_symbol(symbol_node);
     }
@@ -136,13 +135,12 @@ void insert_extern_to_symbol_table(char *label){
 void process_directive_first_pass(char *field, int is_label, int *DC) {
     int directive_type;
     if (!field) {
-        handle_error(EMPTY_DIRECTIVE_ERROR, lines_count);
+        handle_error(EMPTY_DIRECTIVE_ERROR, lines_count_first_pass);
     }
     directive_type = find_directive_type(field);
-    printf("directive type: %d\n", directive_type);
 
     if (directive_type == NOT_EXISTS_DIRECTIVE_TYPE) {
-        handle_error(NOT_EXISTS_DIRECTIVE_ERROR, lines_count);
+        handle_error(NOT_EXISTS_DIRECTIVE_ERROR, lines_count_first_pass);
     }
 
     if (directive_type == ENTRY_DIRECTIVE_TYPE) {
@@ -158,14 +156,13 @@ void process_directive_first_pass(char *field, int is_label, int *DC) {
 
         if (directive_type == DATA_DIRECTIVE_TYPE) {
             field = strtok(NULL, ", \n\r\t");
-            printf("found .data directive. next field: %s\n", field);
-            insert_numbers_to_data(field, lines_count, DC);
+            insert_numbers_to_data(field, lines_count_first_pass, DC);
         } else if (directive_type == STRING_DIRECTIVE_TYPE) {
-            field = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
-            insert_string_to_data(field, lines_count, DC);
+            field = strtok(NULL, "");
+            insert_string_to_data(field, lines_count_first_pass, DC);
         } else if (directive_type == MAT_DIRECTIVE_TYPE) {
             field = strtok(NULL, ", \n\r\t");
-            insert_matrix_to_data(field, lines_count, DC);
+            insert_matrix_to_data(field, lines_count_first_pass, DC);
         }
     }
 
@@ -185,10 +182,9 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
     source_addressing = target_addressing = NO_ADDRESSING;
     cur_opcode = get_opcode(field);
     if (!cur_opcode) {
-        handle_error(OPCODE_NOT_FOUND_ERROR, lines_count);
+        handle_error(OPCODE_NOT_FOUND_ERROR, lines_count_first_pass);
         return;
     }
-    printf("Opcode: %s\n", cur_opcode->name);
     if (is_label) {
         sym_pt symbol_node = create_symbol_node(label, *IC, is_external, is_action);
         insert_symbol(symbol_node);
@@ -197,26 +193,25 @@ void process_instruction_first_pass(char *field, int is_label, int *IC) {
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
             operand = strtok(NULL, " \n,");
-            printf("source operand: %s\n", operand);
             if (!operand){
-                handle_error(TOO_FEW_OPERANDS_ERROR, lines_count);
+                handle_error(TOO_FEW_OPERANDS_ERROR, lines_count_first_pass);
                 return;
             }
-            source_addressing = get_addressing_and_validate(operand, cur_opcode->source_addressing_types, lines_count);
+            source_addressing = get_addressing_and_validate(operand, cur_opcode->source_addressing_types, lines_count_first_pass);
         }
         operand = strtok(NULL, " \n,");
         if (!operand){
-            handle_error(TOO_FEW_OPERANDS_ERROR, lines_count);
+            handle_error(TOO_FEW_OPERANDS_ERROR, lines_count_first_pass);
             return;
         }
-        target_addressing = get_addressing_and_validate(operand, cur_opcode->target_addressing_types, lines_count);
+        target_addressing = get_addressing_and_validate(operand, cur_opcode->target_addressing_types, lines_count_first_pass);
     }
 
     words_count += get_words_count_by_both_addressings(source_addressing, target_addressing);
 
     operand = strtok(NULL, " \n,");
     if (operand) {
-        handle_error(TOO_MANY_OPERANDS, lines_count);
+        handle_error(TOO_MANY_OPERANDS, lines_count_first_pass);
         return;
     }
     *IC += words_count;

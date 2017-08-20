@@ -7,6 +7,7 @@
 
 static opcode_pt hash_table[OPCODES_COUNT] = {NULL};
 static char *instructions[MAX_INSTRUCTIONS_LINES];
+static short int instructions_count;
 
 allowed_addressing_bitfields g1 = {1, 1, 1, 1};
 allowed_addressing_bitfields g2 = {0, 1, 1, 1};
@@ -39,9 +40,11 @@ build_operand_instruction_line(addressing_t addressing, char *operand, bool is_t
 
 void build_value_instruction_code(int value, coding_type_enum coding_type, int IC);
 
-void build_matrix_instruction_code(char *operand, int IC);
+void build_matrix_instruction_code(char *operand, int IC, int line_number);
 
 coding_type_enum get_coding_type_from_symbol(sym_pt symbol);
+
+void insert_instruction(int IC, const char *word);
 
 int get_opcode_hash_index(char *name) {
     int sum;
@@ -110,7 +113,9 @@ addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfi
     if (is_addressing_in_allowed_addressings(addressing, allowed_addressings)) {
         return addressing;
     }
-    handle_error(ADDRESSING_NOT_ALLOWED_ERROR, lines_count);
+    if (addressing != NO_ADDRESSING){
+        handle_error(ADDRESSING_NOT_ALLOWED_ERROR, lines_count);
+    }
     return NO_ADDRESSING;
 }
 
@@ -118,22 +123,23 @@ addressing_t get_addressing_by_operand(char *operand, int lines_count) {
 
     if (*operand == '#') {
         char *ptr;
+        long num;
         operand++;
-        printf("num: %s\n", operand);
-        strtol(operand, &ptr, DECIMAL_BASE);
+        num = strtol(operand, &ptr, DECIMAL_BASE);
         if (*ptr) {
-            printf("error: %s", ptr);
             handle_error(INVALID_NUMBER_ERROR, lines_count);
             return NO_ADDRESSING;
-        } else {
+        } else if (num > MAX_IMMIDIATE_NUM || num < MIN_IMMIDIATE_NUM){
+            handle_error(NUMBER_OUT_OF_RANGE_ERROR, lines_count);
+            return NO_ADDRESSING;
+        }
+        else {
             return IMMEDIATE_ADDRESSING;
         }
     } else if (isalpha(*operand)) {
-        printf("checking operand: %s\n", operand);
         if (is_register(operand)) {
             return REGISTER_ADDRESSING;
         } else if (is_valid_matrix_for_instruction(operand, lines_count)) {
-            printf("is matrix!.\n");
             return MATRIX_ADRESSING;
         } else if (label_is_valid(operand, strlen(operand), lines_count)) {
             return DIRECT_ADDRESSING;
@@ -142,7 +148,6 @@ addressing_t get_addressing_by_operand(char *operand, int lines_count) {
         }
 
     } else {
-        printf("is not alpha.. char found: '%c'\n", *operand);
         handle_error(INVALID_INSTRUCTION_OPERAND_ERROR, lines_count);
         return NO_ADDRESSING;
     }
@@ -167,8 +172,8 @@ int get_words_count_by_both_addressings(addressing_t source_addressing, addressi
     }
 }
 
-void build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char *source_operand,
-                      addressing_t target_addressing, char *target_operand, int lines_count, int IC) {
+int build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char *source_operand,
+                     addressing_t target_addressing, char *target_operand, int lines_count, int IC) {
     int words_count;
     words_count = 1;
     build_instruction_line(cur_opcode, source_addressing, target_addressing, IC);
@@ -177,8 +182,9 @@ void build_code_lines(opcode_pt cur_opcode, addressing_t source_addressing, char
     } else {
         words_count += build_operand_instruction_line(source_addressing, source_operand, FALSE, IC + words_count,
                                                       lines_count);
-        build_operand_instruction_line(target_addressing, target_operand, TRUE, IC + words_count, lines_count);
+        words_count += build_operand_instruction_line(target_addressing, target_operand, TRUE, IC + words_count, lines_count);
     }
+    return words_count;
 
 }
 
@@ -194,7 +200,7 @@ int build_operand_instruction_line(addressing_t addressing, char *operand, bool 
     if (addressing == NO_ADDRESSING) {
         return 0;
     } else if (addressing == MATRIX_ADRESSING) {
-        build_matrix_instruction_code(operand, IC);
+        build_matrix_instruction_code(operand, IC, lines_count);
         return 2;
     } else if (addressing == REGISTER_ADDRESSING) {
         if (is_target_operand) {
@@ -238,7 +244,7 @@ coding_type_enum get_coding_type_from_symbol(sym_pt symbol) {
     return coding_type;
 }
 
-void build_matrix_instruction_code(char *operand, int IC) {
+void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     char *word_p, *mat_name;
     word_p = operand;
     size_t i;
@@ -256,6 +262,10 @@ void build_matrix_instruction_code(char *operand, int IC) {
     sscanf(operand, "[%[^]]][ %[^]]]", row_register, col_register);
     sym_pt symbol;
     symbol = search_symbol_by_label(mat_name);
+    if (!symbol){
+        handle_error(LABEL_DOES_NOT_EXIST_ERROR, line_number);
+        return;
+    }
     coding_type_enum coding_type;
     coding_type = get_coding_type_from_symbol(symbol);
     build_value_instruction_code(symbol->address, coding_type, IC);
@@ -271,8 +281,13 @@ void build_value_instruction_code(int value, coding_type_enum coding_type, int I
     int_to_bin(coding_type, word_p, 2);
     word_p += 2;
     *word_p = '\0';
-    instructions[IC] = strdup(word);
+    insert_instruction(IC, word);
 
+}
+
+void insert_instruction(int IC, const char *word) {
+    instructions[IC] = strdup(word);
+    instructions_count++;
 }
 
 void build_registers_instruction_line(char *source_register, char *target_register, int IC) {
@@ -289,7 +304,7 @@ void build_registers_instruction_line(char *source_register, char *target_regist
     int_to_bin(ABSOLUTE_CODING_TYPE, word_p, 2);
     word_p += 2;
     *word_p = '\0';
-    instructions[IC] = strdup(word);
+    insert_instruction(IC, word);
 
 }
 
@@ -307,12 +322,7 @@ void build_instruction_line(opcode_pt cur_opcode, addressing_t source_addressing
     int_to_bin(ABSOLUTE_CODING_TYPE, word_p, 2);
     word_p += 2;
     *word_p = '\0';
-    printf("Building instruction code.\n");
-    printf("IC: %d\n", IC);
-    printf("Opcode: %s\n", cur_opcode->name);
-    printf("Source addressing: %d\n", source_addressing);
-    printf("Target addressing: %d\n", target_addressing);
-    instructions[IC] = strdup(word);
+    insert_instruction(IC, word);
 
 }
 
@@ -324,6 +334,7 @@ void clean_code(){
         free(word);
         instructions[i] = NULL;
     }
+    instructions_count = 0;
 }
 
 bool is_addressing_in_allowed_addressings(addressing_t addressing, allowed_addressing_bitfields *allowed_addressings){
@@ -334,16 +345,29 @@ bool is_addressing_in_allowed_addressings(addressing_t addressing, allowed_addre
 }
 
 bool is_code_empty(){
-    return (bool) (instructions[0] == NULL);
+    return (bool) (instructions_count == 0);
 }
 
 void write_code_to_ob_file(FILE *fp){
     int i;
+    char address[9];
+    char address_4_base[5];
+    char value_4_base[6];
     for (i = 0; i < 256; i++){
+
         if (!instructions[i]){
             break;
         }
-        fputs(instructions[i], fp);
+        int_to_bin(i + START_IC, address, 8);
+        bin_to_4base(address, address_4_base, 8);
+        bin_to_4base(instructions[i], value_4_base, 10);
+        fputs(address_4_base, fp);
+        fputc('\t',fp);
+        fputs(value_4_base, fp);
         fputc('\n', fp);
     }
+}
+
+short int get_insrtuctions_count(){
+    return instructions_count;
 }

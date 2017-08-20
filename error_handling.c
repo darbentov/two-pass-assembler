@@ -84,10 +84,19 @@ void handle_error(error_code err, int line_number) {
             printf("Line %d: invalid operand for instruction.\n", line_number);
             break;
         case MATRIX_INDEX_MUST_BE_REGISTERS_ERROR:
-            printf("Line %d: matrix indexes must be registers.\n", line_number);
+            printf("Line %d: matrix indices must be registers.\n", line_number);
             break;
         case INVALID_MATRIX_DECLARATION:
             printf("Line %d: invalid matrix declaration.\n", line_number);
+            break;
+        case TOO_MANY_NUMBERS_FOR_MAT:
+            printf("Line %d: too many numbers in matrix declaration.\n", line_number);
+            break;
+        case NEGTIVE_INDEX_MATRIX_DECLARATION_ERROR:
+            printf("Line %d: matrix indicies must be a positive number.\n", line_number);
+            break;
+        case EXTRA_CHARACTERS_AFTER_STRING_DECLARARTION_ERROR:
+            printf("Line %d: extra characters after string declaration.\n", line_number);
             break;
     }
 

@@ -5,10 +5,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 /*This file contains functions which handle the data list*/
 
 /*pointer to the first node*/
 static Data_pt data_head = NULL;
+static short int data_count;
 
 
 /*This function takes a string as a parameter, and splits it into tokens of whole numbers.
@@ -81,6 +83,7 @@ void insert_new_data(int *DC, short num) {/*create new pointer to data, allocate
         /*make tmp the last node*/
         p->next = tmp;
     }
+    data_count++;
     (*DC)++;
 }
 
@@ -89,6 +92,9 @@ void insert_new_data(int *DC, short num) {/*create new pointer to data, allocate
 int insert_string_to_data(char *string, int line_number, int *DC) {
     char c;
     /* check if string is empty */
+    while (string && isspace(*string)){
+        string++;
+    }
     if (!string) {
         handle_error(NO_STRING_ERROR, line_number);
         return BAD_EXIT_STATUS;
@@ -107,6 +113,15 @@ int insert_string_to_data(char *string, int line_number, int *DC) {
         handle_error(STRING_MUST_BE_ENCLOSED_BY_QUOTES_ERROR, line_number);
         return BAD_EXIT_STATUS;
     }
+    else {
+        c = *string;
+        while ((c = *string++)) {
+            if (!isspace(c)){
+                handle_error(EXTRA_CHARACTERS_AFTER_STRING_DECLARARTION_ERROR, line_number);
+                return BAD_EXIT_STATUS;
+            }
+        }
+    }
     /*add null terminator*/
     insert_new_data(DC, STRING_NULL_TERMINATOR);
     return GOOD_EXIT_STATUS;
@@ -114,22 +129,8 @@ int insert_string_to_data(char *string, int line_number, int *DC) {
 }
 
 /*This functions counts the number of nodes in the data list*/
-int count_all_data() {
-    /*Temp counter variable*/
-    int counter = 0;
-    /*pointer to data_head*/
-    Data_pt ptr = data_head;
-    /*if data_head is null, return counter (0)*/
-    if (!ptr)
-        return counter;
-
-    /*go through the list and count each node*/
-    while (ptr) {
-        counter++;
-        ptr = ptr->next;
-    }
-    /*Return the number of nodes*/
-    return counter;
+short get_data_count() {
+    return data_count;
 }
 
 /*This function updates the data addresses AFTER we have all our operation words*/
@@ -165,6 +166,7 @@ void clean_data() {
     }
     /*make the data_head pointer null*/
     data_head = NULL;
+    data_count = 0;
 }
 
 /*return pointer to data_head. used when exporting files*/
@@ -177,26 +179,41 @@ Data_pt get_data_head() {
 int insert_matrix_to_data(char *token, int line_number, int *DC){
     int matrix_data_count;
     matrix_data_count = get_data_count_from_matrix_declaration(token, line_number);
-    while (matrix_data_count--){
+    if (matrix_data_count == 0){
+        return 1;
+    }
+    while (matrix_data_count-- > 0){
         token = strtok(NULL, " ,\t\n");
         if (!token){
             token = "0";
         }
         insert_single_number(token, line_number, DC);
     }
+    token = strtok(NULL, " ,\t\n");
+    if (token){
+        handle_error(TOO_MANY_NUMBERS_FOR_MAT, line_number);
+    }
     return 1;
 }
 
 bool is_data_empty(){
-    return (bool) (count_all_data() == 0);
+    return (bool) (data_count == 0);
 }
 
 void write_data_to_ob_file(FILE *fp){
     char word[WORD_SIZE];
+    char address[9];
+    char address_4_base[5];
+    char value_4_base[6];
     Data_pt ptr = data_head;
     while (ptr){
-        int_to_bin(ptr->address, word, WORD_SIZE);
-        fputs(word, fp);
+        int_to_bin(ptr->address, address, 8);
+        int_to_bin(ptr->value, word, WORD_SIZE - 1);
+        bin_to_4base(address, address_4_base, 8);
+        bin_to_4base(word, value_4_base, 10);
+        fputs(address_4_base, fp);
+        fputc('\t',fp);
+        fputs(value_4_base, fp);
         fputc('\n', fp);
         ptr = ptr->next;
     }

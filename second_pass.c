@@ -10,7 +10,7 @@
 #include "opcode.h"
 
 extern int err_count;
-int lines_count;
+int lines_count_second_pass = 0;
 
 void process_line_second_pass(char *token, int *IC_pt);
 
@@ -50,10 +50,10 @@ void second_pass(FILE *fp){
     char *token;
     int IC;
     IC = 0;
+    lines_count_second_pass = 0;
     while (fgets(line, MAX_CODE_LINE, fp)) {
-        lines_count++;
+        lines_count_second_pass++;
         line_p = line;
-        printf("Working on line: %s", line_p);
         while (isspace(*line_p)) {
             line_p++;
         }
@@ -65,7 +65,7 @@ void second_pass(FILE *fp){
 }
 
 void process_line_second_pass(char *token, int *IC_pt) {
-    if (get_label(token,lines_count)){
+    if (get_label(token,lines_count_second_pass)){
         token = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
     }
     if (*token == '.'){
@@ -73,7 +73,6 @@ void process_line_second_pass(char *token, int *IC_pt) {
         process_directive_second_pass(token);
     }
     else {
-        printf("Second pass: found instruction. current IC: %d\n", *IC_pt);
         process_instruction_second_pass(token, IC_pt);
     }
 }
@@ -81,28 +80,22 @@ void process_line_second_pass(char *token, int *IC_pt) {
 void process_instruction_second_pass(char *token, int *IC_pt) {
 
     opcode_pt cur_opcode;
-    int words_count;
     char *target_operand;
     char *source_operand;
     addressing_t source_addressing, target_addressing;
     cur_opcode = get_opcode(token);
-    source_addressing = NO_ADDRESSING;
-    source_operand = NULL;
-    words_count = 1;
+    source_addressing = target_addressing = NO_ADDRESSING;
+    source_operand = target_operand = NULL;
     if (cur_opcode->target_addressing_types) {
         if (cur_opcode->source_addressing_types) {
             source_operand = strtok(NULL, " \n,");
-            source_addressing = get_addressing_and_validate(source_operand, cur_opcode->source_addressing_types, lines_count);
+            source_addressing = get_addressing_and_validate(source_operand, cur_opcode->source_addressing_types, lines_count_second_pass);
 
         }
         target_operand = strtok(NULL, " \n,");
-        target_addressing = get_addressing_and_validate(target_operand, cur_opcode->target_addressing_types, lines_count);
-        printf("source addressing: %d\n", source_addressing);
-        printf("target addressing: %d\n", target_addressing);
-        build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand, lines_count, *IC_pt);
+        target_addressing = get_addressing_and_validate(target_operand, cur_opcode->target_addressing_types, lines_count_second_pass);
     }
-
-    *IC_pt += words_count;
+    *IC_pt += build_code_lines(cur_opcode, source_addressing, source_operand, target_addressing, target_operand, lines_count_second_pass, *IC_pt);
 
 }
 
@@ -117,7 +110,7 @@ void process_directive_second_pass(char *token) {
     }
     symbol = search_symbol_by_label(token);
     if (!symbol){
-        handle_error(ENTRY_OPERAND_LABEL_DOES_NOT_EXIST_ERROR, lines_count);
+        handle_error(ENTRY_OPERAND_LABEL_DOES_NOT_EXIST_ERROR, lines_count_second_pass);
         return;
     }
 

@@ -21,8 +21,9 @@ static directive directives[] = {
         {"string", STRING_DIRECTIVE_TYPE},
         {"entry",  ENTRY_DIRECTIVE_TYPE},
         {"extern", EXTERN_DIRECTIVE_TYPE}
-
 };
+
+static int directive_count = 5;
 
 int find_directive_type(char *directive_name);
 

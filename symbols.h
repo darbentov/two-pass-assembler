@@ -36,4 +36,7 @@ void clean_symbol_table();
 
 void clean_symbol_table_from_given_node(sym_pt symbol);
 
+void print_all_symbols();
+
+
 #endif
