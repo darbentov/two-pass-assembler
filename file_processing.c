@@ -22,6 +22,7 @@ void write_counts_to_ob_file(FILE *fp);
 void process_file(char *filename) {
     FILE *fp;
     fp = open_file(filename, READ_MODE, AS_EXTENSION);
+    printf("Processing file: %s%s\n", filename, AS_EXTENSION);
     if (!fp){
         return;
     }
