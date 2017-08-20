@@ -26,14 +26,14 @@ void process_file(char *filename) {
         return;
     }
     first_pass(fp);
-    if (err_count)
-        return;
     fseek(fp, 0, 0);
-    second_pass(fp);
-    if (err_count)
-        return;
+    if (!err_count){
+        second_pass(fp);
+    }
     fclose(fp);
-    generate_output_files(filename);
+    if (!err_count){
+        generate_output_files(filename);
+    }
     clean_symbol_table();
     clean_extern_table();
     clean_entry_table();

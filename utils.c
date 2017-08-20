@@ -95,6 +95,7 @@ FILE * open_file(char* filename, char * mode, char * extension)
     strcpy(full_filename, filename);
     /*Add the .as extension to the full filename.*/
     strcat(full_filename, extension);
+
     /*Open the file. if fopen return null, exit the function and print error to screen*/
     if (!(fp = fopen(full_filename, mode)))
     {

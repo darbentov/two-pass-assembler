@@ -128,6 +128,7 @@ void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC){
 
 void clean_symbol_table(){
     clean_symbol_table_from_given_node(symbol_head);
+    symbol_head = NULL;
 }
 
 void clean_symbol_table_from_given_node(sym_pt symbol){

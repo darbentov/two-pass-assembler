@@ -14,6 +14,7 @@ void insert_extern(char *extern_label, int address) {
     new = (extern_pt) (malloc(sizeof(ExternObj)));
     new->label = strdup(extern_label);
     new->address = address;
+    new->next = NULL;
     if (!extern_head) {
         extern_head = new;
     } else {
