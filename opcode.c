@@ -362,9 +362,9 @@ void write_code_to_ob_file(FILE *fp){
         bin_to_4base(address, address_4_base, 8);
         bin_to_4base(instructions[i], value_4_base, 10);
         fputs(address_4_base, fp);
-        fputc('\t',fp);
+        fputc(TAB_SEPERATOR,fp);
         fputs(value_4_base, fp);
-        fputc('\n', fp);
+        fputc(LINE_BREAK, fp);
     }
 }
 

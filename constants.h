@@ -22,4 +22,8 @@
 
 #define ENTRY_EXTENSION ".ent"
 
+#define LINE_BREAK '\n'
+
+#define TAB_SEPERATOR '\t'
+
 #endif

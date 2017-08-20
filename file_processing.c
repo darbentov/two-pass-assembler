@@ -75,8 +75,8 @@ void write_counts_to_ob_file(FILE *fp) {
     int_to_bin(get_insrtuctions_count(), instructions_count, 8);
     bin_to_4base(instructions_count, instructions_count_4base, 8);
     fputs(instructions_count_4base, fp);
-    fputc('\t', fp);
+    fputc(TAB_SEPERATOR, fp);
     fputs(data_count_4_base, fp);
-    fputc('\n', fp);
+    fputc(LINE_BREAK, fp);
 }
 

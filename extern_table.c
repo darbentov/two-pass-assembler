@@ -55,9 +55,9 @@ void write_extern_file(char *filename){
         int_to_bin(tmp->address, address, 8);
         bin_to_4base(address, address_4_base, 8);
         fputs(tmp->label, fp);
-        fputc('\t', fp);
+        fputc(TAB_SEPERATOR, fp);
         fputs(address_4_base, fp);
-        fputc('\n', fp);
+        fputc(LINE_BREAK, fp);
         tmp = tmp->next;
     }
     fclose(fp);
