@@ -1,0 +1,49 @@
+CC = gcc
+CFLAGS  = -c -Wall -ansi -pedantic
+
+all: assembler
+
+assembler: main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o
+	$(CC) $(CFLAGS) main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o -o assembler
+
+main.o:	main.c
+	$(CC) $(CFLAGS) main.c
+
+file_processing.o: file_processing.c file_processing.h
+	$(CC) $(CFLAGS) file_processing.c 
+
+first_pass.o: first_pass.c first_pass.h
+	$(CC) $(CFLAGS) first_pass.c  
+
+second_pass.o: second_pass.c second_pass.h
+	$(CC) $(CFLAGS) second_pass.c  
+
+error_handling.o: error_handling.c error_handling.h
+	$(CC) $(CFLAGS) error_handling.c 
+
+symbols.o: symbols.c symbols.h
+	$(CC) $(CFLAGS) symbols.c 
+
+data.o: data.c data.h
+	$(CC) $(CFLAGS) data.c 
+
+entry_table.o: entry_table.c entry_table.h
+	$(CC) $(CFLAGS) entry_table.c 
+
+opcode.o: opcode.c opcode.h
+	$(CC) $(CFLAGS) opcode.c 
+
+extern_table.o: extern_table.c extern_table.h
+	$(CC) $(CFLAGS) extern_table.c  
+
+utils.o: utils.c utils.h
+	$(CC) $(CFLAGS) utils.c  
+
+directives.o: directives.c directives.h
+	$(CC) $(CFLAGS) directives.c 
+
+keywords.o: keywords.c keywords.h
+	$(CC) $(CFLAGS) keywords.c 
+
+clean:
+	rm *.o

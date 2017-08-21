@@ -4,117 +4,101 @@ Error handling of errors occurred during introspection of .as file
 #include <stdio.h>
 #include "error_handling.h"
 
-void print_error(error_code err, int line_number) {
+int err_count;
+
+void handle_error(error_code err, int line_number) {
+    err_count++;
+    printf("\tError found in line %d: ", line_number);
     switch (err) {
         case SYNTAX_ERROR:
-            printf("line %d: Syntax error. \n", line_number);
+            printf("Syntax error.\n");
             break;
         case LABEL_WITH_NO_DATA_ERROR:
-
-            printf("Line %d: line should contain more than a label.\n", line_number);
+            printf("line should contain more than a label.\n");
             break;
         case LABEL_ALREADY_EXISTS_ERROR:
-            printf("Line %d: label already exists.\n", line_number);
+            printf("label already exists.\n");
             break;
         case LABEL_TOO_LONG_ERROR:
-            printf("line %d: label contains more than 30 characters.\n", line_number);
+            printf("label contains more than 30 characters.\n");
             break;
         case LABEL_CONTAINS_INVALID_CHARACTER_ERROR:
-            printf("line %d: label contains invalid characters.\n", line_number);
+            printf("label contains invalid characters.\n");
             break;
         case LABEL_FIRST_CHAR_IS_NOT_ALPHA_ERROR:
-            printf("line %d: First character of the label must be a letter.\n", line_number);
+            printf("First character of the label must be a letter.\n");
             break;
-        case LABEL_IS_KEYWORD_ERROR:
-            printf("line %d: Label cannot be a keyword.\n", line_number);
+        case LABEL_IS_OPCODE_ERROR:
+            printf("Label cannot be an opcode.\n");
+            break;
+        case LABEL_IS_DIRECTIVE_ERROR:
+            printf("Label cannot be a directive.\n");
+            break;
+        case LABEL_IS_REGISTER_ERROR:
+            printf("Label cannot be a register.\n");
+            break;
+        case EMPTY_DIRECTIVE_ERROR:
+            printf("directive is empty.\n");
         case NOT_EXISTS_DIRECTIVE_ERROR:
-            printf("line %d: Unrecognized directive. \n", line_number);
+            printf("Unrecognized directive.\n");
             break;
         case LABEL_IS_ALREADY_EXTERN:
-            printf("Line %d: label already defined as external \n", line_number);
+            printf("label already defined as external.\n");
             break;
         case LABEL_IS_ALREADY_ENTRY:
-            printf("Line %d: label already defined as entry \n", line_number);
+            printf("label already defined as entry.\n");
             break;
-        case 40:
-            printf("line %d: label cannot be a directive. \n", line_number);
+        case DATA_DIRECTIVE_WITH_NO_DATA_ERROR:
+            printf(".data directive got no data to insert.\n");
             break;
-        case 41:
-            printf("line %d: Previously defined label. \n", line_number);
+        case INVALID_NUMBER_ERROR:
+            printf("invalid number.\n");
             break;
-        case 62:
-
+        case NUMBER_OUT_OF_RANGE_ERROR:
+            printf("number is out of range.\n");
             break;
-        case 74:
-            printf("line %d: unrecognized insruction. \n", line_number);
+        case NO_STRING_ERROR:
+            printf(".string directive got no string to insert.\n");
             break;
-
-        case 50:
-            printf("line %d: To many characters for one line. The number of characters per line must be less than 80.\n",
-                   line_number);
+        case STRING_MUST_BE_ENCLOSED_BY_QUOTES_ERROR:
+            printf("string must be enclosed by '\"'.\n");
             break;
-        case 101:
-            printf("line %d: bad argument[s]\n", line_number);
+        case ENTRY_OPERAND_LABEL_DOES_NOT_EXIST_ERROR:
+            printf("entry points to a label that does not exist in the file.\n");
             break;
-        case 111:
-            printf("line %d: label cannot be an instruction.\n", line_number);
+        case LABEL_DOES_NOT_EXIST_ERROR:
+            printf("label does not exist.\n");
             break;
-        case 112:
-            printf("Line %d: Illegal addressing, check operands. \n", line_number);
+        case ADDRESSING_NOT_ALLOWED_ERROR:
+            printf("Illegal addressing.\n");
             break;
-        case 131:
-            printf("Line %d: label cannot be a register \n", line_number);
+        case OPCODE_NOT_FOUND_ERROR:
+            printf("opcode not found.\n");
             break;
-        case 114:
-            printf("Line %d:no character[s] between the quotation marks ", line_number);
+        case TOO_FEW_OPERANDS_ERROR:
+            printf("too few operands for given opcode.\n");
             break;
-        case 115:
-            printf("Line %d: label was not defined in the file \n", line_number);
+        case TOO_MANY_OPERANDS:
+            printf("too many operands for given opcode.\n");
             break;
-        case 116:
-
-        case 117:
-            printf("Line %d: cannot define label as external. ", line_number);
-            printf("label already defined as internal.\n");
+        case INVALID_INSTRUCTION_OPERAND_ERROR:
+            printf("invalid operand for instruction.\n");
             break;
-        case 118:
-            printf("Line %d: Error: expecting argument...\n", line_number);
+        case MATRIX_INDEX_MUST_BE_REGISTERS_ERROR:
+            printf("matrix indices must be registers.\n");
+            break;
+        case INVALID_MATRIX_DECLARATION:
+            printf("invalid matrix declaration.\n");
+            break;
+        case TOO_MANY_NUMBERS_FOR_MAT:
+            printf("too many numbers in matrix declaration.\n");
+            break;
+        case NEGTIVE_INDEX_MATRIX_DECLARATION_ERROR:
+            printf("matrix indicies must be a positive number.\n");
+            break;
+        case EXTRA_CHARACTERS_AFTER_STRING_DECLARARTION_ERROR:
+            printf("extra characters after string declaration.\n");
             break;
     }
 
 }
-
-
-/*---------------- write_error2 ------------------------
-write_error2: This function uses the global variable
-             "error" to determine whether an error
-	         should be written to the screen.
---------------------------------------------------------
-*/
-int write_error2(int line_number, char *line) {
-
-    switch (error) {
-        case 1:
-            printf("Line %d: unrecognized label \n", line_number);
-            break;
-        case 2:
-            printf("Line %d: Error: expecting argument... \n", line_number);
-            break;
-        case 3:
-            printf("Line %d: To few actual argument[s] \n", line_number);
-            break;
-        case 4:
-            printf("Line %d: misseing quotation[s] character on .string directive", line_number);
-            break;
-        case 5:
-            line = skipspace(line);
-            line = nextfield(line);
-            if (line == NULL)
-                return 0;
-            printf("Line %d: file has no internal label name \"%s\" ", line_number, line);
-            break;
-
-    }
-    return -13; /* late */
-}
-

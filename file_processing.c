@@ -1,223 +1,97 @@
 #include "file_processing.h"
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
 #include "keywords.h"
-#include "opcode.h"
-#include "directives.h"
+#include "data.h"
+#include "first_pass.h"
+#include "second_pass.h"
+#include "extern_table.h"
+#include "entry_table.h"
+#include "constants.h"
 
 
-typedef struct flags {
-    unsigned is_label:1;
-    unsigned in_data:1;
-    unsigned in_mat:1;
-};
+/* declaring an extern variable of errors count */
+
+extern int err_count;
 
 
-/*
- * First Pass Algorithm
- * 1.  IC -> 0, DC -> 0.
- * 2.  Read line, if EOF: move to step 16.
- * 3.  Check if first field of line is a label, if yes: move to step 4, if not: move to step 5.
- * 4.  turn on 'is_label' flag.
- * 5.  Check if current field is a directive for storing data (.data / .mat / .string)?
- *     if yes: move to step 6, if not: move to step 8.
- *
- *
- ****** Dealing with a directive ***********
- *
- *
- * 6.  If 'is_label' flag is turned on, insert label to Symbol table as a data Symbol
- *     and insert the current value of DC as the address.
- * 7.  verify type of data, insert into data memory and update DC by the words count. Go back to step 2.
- * 8.  Is this a .extern or .entry? If yes: move to step 9, if not: move to step 11.
- * 9.  Is this a .extern? if yes, insert the label (operand of .extern directive) to the Symbol table with flag 'is_external'.
- * 10. Go back to step 2
- *
- *
- ****** Dealing with an instruction ***********
- *
- *
- * 11. If 'is_label' flag is turned on, insert label to Symbol table as a data Symbol
- *     and insert the current value of IC as the address.
- * 12. Look for the instruction name in the Instructions table.
- * 13. Check operands of the instruction and calculate the words count.
- *     build the code of the first word (The instruction itself).
- * 14. update IC by the words count.
- * 15. Go back to step 2.
- *
- *
- *************** Wrapping up *****************
- *
- *
- * 16. If errors were found, stop the processing of the file.
- * 17. Update the addresses of the Symbol which refers to data, by adding the value of IC.
- * 18. Start second pass.
- *
- * Done!
- */
+void generate_output_files(char *filename);
 
+void write_ob_file(char *filename);
 
+void write_counts_to_ob_file(FILE *fp);
 
+/* 11. Create and save the output files: .ob file, .ext file (if needed), .ent file (if needed). */
 
 void process_file(char *filename) {
-    char actions[MAX_CODE_LINE][WORD_SIZE];
-    FILE *fp = fopen(filename, "r");
+    FILE *fp;
+    /* open file for read with .as extension */
+    fp = open_file(filename, READ_MODE, AS_EXTENSION);
+    printf("Processing file: %s%s\n", filename, AS_EXTENSION);
+    if (!fp) {
+        return;
+    }
     first_pass(fp);
-    if (err_count)
-        return;
-    second_pass(fp, symbol_head);
-    if (err_count)
-        return;
-    generate_output_files(symbol_head);
+    /* point to head of file, so second pass will run from the start of the file */
+    fseek(fp, 0, 0);
+    /* If errors found, don't do the second pass */
+    if (!err_count) {
+        second_pass(fp);
+    }
+    fclose(fp);
+    if (!err_count) {
+        generate_output_files(filename);
+    }
+
+    /* Cleaning The data for the next file */
     clean_symbol_table();
-    clean_externs_table();
-    clean_entries_table();
+    clean_extern_table();
+    clean_entry_table();
     clean_code();
     clean_data();
+    err_count = 0;
 }
 
-void first_pass(FILE *fp) {
-
-    char line[MAX_CODE_LINE];
-    char *line_p;
-    line_p = line;
-    while (fgets(line, MAX_CODE_LINE, fp)) {
-        lines_count++;
-        line_p = strip_blank_chars(line_p);
-        if (is_comment_or_empty(line_p))
-            continue;
-        process_line_first_pass(line_p);
+void generate_output_files(char *filename) {
+    if (!is_code_empty() || !is_data_empty()) {
+        write_ob_file(filename);
+    }
+    if (!is_extern_empty()) {
+        write_extern_file(filename);
+    }
+    if (!is_entry_empty()) {
+        write_entry_file(filename);
     }
 }
 
-
-char* go_to_next_field(char *line) {
-    while (!isspace(*line))
-        line++;
-    while (isspace(*line)){
-        line++;
-    }
-    return line;
-}
-
-
-int process_directive(char *line, int is_label) {
-    char * directive_name;
-    int directive_type;
-    int i;
-    i = 0;
-    while (!isspace(*line++))
-        i++;
-    directive_name = strndup(line, i);
-    directive_type = find_directive_type(directive_name);
-    if (directive_type == NOT_EXISTS_DIRECTIVE_TYPE){
-        print_error(NOT_EXISTS_DIRECTIVE_ERROR, lines_count);
-        return 0;
-    }
-
-    if (directive_type < ENTRY_DIRECTIVE_TYPE){
-
-    }
+void write_ob_file(char *filename) {
+    FILE *fp;
+    fp = open_file(filename, WRITE_MODE, OB_EXTENSION);
+    write_counts_to_ob_file(fp);
+    write_code_to_ob_file(fp);
+    write_data_to_ob_file(fp);
+    fclose(fp);
 
 }
 
-int process_line_first_pass(char *line) {
-    {
+void write_counts_to_ob_file(FILE *fp) {
+    char instructions_count[BITS_COUNT_OF_AN_INT + 1];
+    char data_count[BITS_COUNT_OF_AN_INT + 1];
+    char instructions_count_4base[(BITS_COUNT_OF_AN_INT / 2) + 1];
+    char data_count_4_base[(BITS_COUNT_OF_AN_INT / 2) + 1];
 
-        /*char *p=line  ;*/
-        int temp = 0;
-        int is_label = 0;
+    /* convert data count (int) to 4-odd-base string */
+    int_to_bin(get_data_count(), data_count, BITS_COUNT_OF_AN_INT);
+    bin_to_4base(data_count, data_count_4_base, BITS_COUNT_OF_AN_INT);
 
+    /* convert instructions count (int) to 4-odd-base string */
+    int_to_bin(get_insrtuctions_count(), instructions_count, BITS_COUNT_OF_AN_INT);
+    bin_to_4base(instructions_count, instructions_count_4base, BITS_COUNT_OF_AN_INT);
 
-        /*___________________________________*/
-
-
-        /* first character can either be a dot or a letter. */
-        if (!(isalpha(*line) || *line == '.')) {
-            err_count++;
-            print_error(SYNTAX_ERROR, lines_count);
-            return 0;
-        }
-        /******** Dealing with Label *******************/
-
-
-        is_label = find_label(line);
-        if (is_label) {
-            line = go_to_next_field(line);
-        }
-
-        if (line == NULL) {
-            err_count++;
-            print_error(LABEL_WITH_NO_DATA_ERROR, lines_count);
-            return 0;
-        }
-
-        /* Looking for directive...-------------*/
-        if (*line == '.') {
-            return process_directive(++line, is_label);
-        }
-            /*--------------------------------------*/
-
-        else {
-            return process_instruction(line, is_label);
-        }
-    }
-}
-
-bool find_label(char *line) {
-    char *p = line;
-    bool is_label_found;
-    int i, c;
-    i = 0;
-    while (*p && *p != LABEL_SEPARATOR) {
-        p++;
-        i++;
-    }
-    is_label_found = (bool) (*p == LABEL_SEPARATOR);
-    if (is_label_found) {
-        strncpy(label, line, i);
-        if (i > MAX_LABEL) {
-            print_error(LABEL_TOO_LONG_ERROR, lines_count);
-            return FALSE;
-        }
-        for (c = 0; c < i; c++) { /* checking label characters.*/
-            if (!isdigit(line[c]) && !isalpha(line[c])) {
-                print_error(LABEL_CONTAINS_INVALID_CHARACTER_ERROR, lines_count);
-                return FALSE;
-            }
-        }
-        if (!isalpha(*line)) { /* label must start with an alpha char */
-            print_error(LABEL_FIRST_CHAR_IS_NOT_ALPHA_ERROR, lines_count);
-            return FALSE;
-        }
-        if (is_keyword(label)) {
-            print_error(LABEL_IS_KEYWORD_ERROR, lines_count);
-            return FALSE;
-        }
-        if (search_extern(label)){
-            print_error(LABEL_IS_ALREADY_EXTERN, lines_count);
-            return FALSE;
-        }
-        if (search_entry(label)){
-            print_error(LABEL_IS_ALREADY_ENTRY, lines_count);
-            return FALSE;
-        }
-    }
-    return is_label_found;
-}
-
-short int is_comment_or_empty(char *line) {
-    char c;
-    c = *line;
-    if (!c || c == COMMENT_CHAR)
-        return 1;
-    return 0;
-}
-
-char *strip_blank_chars(char *line) {
-    char c;
-    while ((c = *line) && isspace(c))
-        line++;
-    return line;
+    /* writing instructions count to first row of file */
+    fputs(instructions_count_4base, fp);
+    /* put a tab seperator */
+    fputc(TAB_SEPERATOR, fp);
+    /* writing data count to first row of file */
+    fputs(data_count_4_base, fp);
+    /* put line break char */
+    fputc(LINE_BREAK, fp);
 }
