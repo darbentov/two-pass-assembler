@@ -57,8 +57,8 @@ sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt node) {
         return NULL;
 }
 
-char *get_label(char *line, int lines_count) {
-    char *p = line;
+char *get_label(char *token, int lines_count) {
+    char *p = token;
     size_t label_length;
     label_length = 0;
     while (*p && *p != LABEL_SEPARATOR) {
@@ -69,9 +69,9 @@ char *get_label(char *line, int lines_count) {
         return NULL;
     }
 
-    line[label_length] = STRING_NULL_TERMINATOR;
-    if (label_is_valid(line, label_length, lines_count)) {
-        return line;
+    token[label_length] = STRING_NULL_TERMINATOR;
+    if (label_is_valid(token, label_length, lines_count)) {
+        return token;
     }
 
     return NULL;

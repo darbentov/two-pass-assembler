@@ -25,10 +25,10 @@ void process_file(char *filename) {
     FILE *fp;
     /* open file for read with .as extension */
     fp = open_file(filename, READ_MODE, AS_EXTENSION);
-    printf("Processing file: %s%s\n", filename, AS_EXTENSION);
     if (!fp) {
         return;
     }
+    printf("Processing file: %s%s\n", filename, AS_EXTENSION);
     first_pass(fp);
     /* point to head of file, so second pass will run from the start of the file */
     fseek(fp, 0, 0);

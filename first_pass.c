@@ -59,7 +59,6 @@ void first_pass(FILE *fp) {
 
     char line[MAX_CODE_LINE];
     char *line_p;
-    char *token;
     int IC, DC;
     IC = DC = 0;
     lines_count_first_pass = 0;
@@ -67,24 +66,24 @@ void first_pass(FILE *fp) {
     while (fgets(line, MAX_CODE_LINE, fp)) {
         lines_count_first_pass++;
         line_p = line;
-        while (isspace(*line_p)) {
+        while (line_p && isspace(*line_p)) {
             line_p++;
         }
-        token = strtok(line_p, BLANK_CHARACTER_SEPARATOR);
-        if (!token || is_comment_or_empty(token))
+
+        if (is_comment_or_empty(line_p))
             continue;
-        process_line_first_pass(token, &DC, &IC);
+        process_line_first_pass(line_p, &DC, &IC);
     }
     increment_data_addresses_by_ic(IC);
     increment_symbol_addresses_by_ic(IC);
 }
 
-void process_line_first_pass(char *token, int *DC, int *IC) {
+void process_line_first_pass(char *line, int *DC, int *IC) {
     {
+        char *token;
         bool is_label;
         is_label = FALSE;
-        if (!token)
-            return;
+        token = strtok(line, BLANK_CHARACTER_SEPARATOR);
 
         /*___________________________________*/
 
@@ -94,10 +93,12 @@ void process_line_first_pass(char *token, int *DC, int *IC) {
             handle_error(SYNTAX_ERROR, lines_count_first_pass);
             return;
         }
+
         /*************** Dealing with Label *******************/
 
 
         label = get_label(token, lines_count_first_pass);
+
         if (label) {
             /* go to the next token in line */
             token = strtok(NULL, BLANK_CHARACTER_SEPARATOR);
@@ -114,6 +115,7 @@ void process_line_first_pass(char *token, int *DC, int *IC) {
                     return;
                 }
             }
+
         }
 
         if (*token == '.') { /* means that this is a direcive */

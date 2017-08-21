@@ -85,7 +85,7 @@ FILE *open_file(char *filename, char *mode, char *extension) {
     char *full_filename;
     full_filename = (char *) (malloc(strlen(filename) + strlen(extension) + 1));
     check_allocation(full_filename);
-    /*Copy the filename from argv to the full filename string*/
+    /*Copy the filename from argv to the full filename string                CHANGE*/
     strcpy(full_filename, filename);
     /*Add the .as extension to the full filename.*/
     strcat(full_filename, extension);

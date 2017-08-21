@@ -24,7 +24,7 @@ void insert_symbol_after_node(sym_pt new_symbol, sym_pt *node);
 
 sym_pt search_symbol_by_label(char *label);
 
-char *get_label(char *line, int lines_count);
+char *get_label(char *token, int lines_count);
 
 bool label_is_valid(char *label, size_t label_length, int lines_count);
 
