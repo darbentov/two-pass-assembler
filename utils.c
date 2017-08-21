@@ -79,23 +79,21 @@ void int_to_bin(int num, char *word_p, int bit_length) {
 }
 
 FILE *open_file(char *filename, char *mode, char *extension) {
-    /*Temp file to be returned*/
+    /*returns Temp file*/
     FILE *fp = NULL;
-    /*Full filename string*/
     char *full_filename;
     full_filename = (char *) (malloc(strlen(filename) + strlen(extension) + 1));
     check_allocation(full_filename);
-    /*Copy the filename from argv to the full filename string                CHANGE*/
+    /*Copy name from argv to filename string*/
     strcpy(full_filename, filename);
-    /*Add the .as extension to the full filename.*/
+    /*Add .as extension to file.*/
     strcat(full_filename, extension);
 
-    /*Open the file. if fopen return null, exit the function and print error to screen*/
     if (!(fp = fopen(full_filename, mode))) {
         printf("Can't open file %s.\n", full_filename);
         return NULL;
     }
-    /*Return pointer to the file*/
+    /*Returns pointer to file*/
     return fp;
 }
 
@@ -112,10 +110,10 @@ void bin_to_4base(char *src, char *dst, int length) {
             dst[((length - i) / 2) - 1] = 'a';
         } else if (strcmp(cur, "01") == 0) {
             dst[((length - i) / 2) - 1] = 'b';
-        } else if (strcmp(cur, "10") == 0) {
-            dst[((length - i) / 2) - 1] = 'c';
+        } else if (strcmp(cur,"10") == 0) {
+            dst[((length - i)/2) - 1] = 'c';
         } else {
-            dst[((length - i) / 2) - 1] = 'd';
+            dst[((length - i)/2) - 1] = 'd';
         }
     }
     dst[length / 2] = 0;
