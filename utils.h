@@ -1,6 +1,5 @@
 #ifndef ASSEMBLER_UTILS_H
 #define ASSEMBLER_UTILS_H
-
 #include <stdio.h>
 
 typedef enum bool {

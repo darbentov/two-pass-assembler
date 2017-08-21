@@ -231,8 +231,8 @@ coding_type_enum get_coding_type_from_symbol(sym_pt symbol) {
 
 void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     char *word_p, *mat_name;
-    word_p = operand;
     size_t i;
+    word_p = operand;
     char row_register[REGISTER_NAME_LENGTH + 1];
     char col_register[REGISTER_NAME_LENGTH + 1];
     i = 0;
@@ -277,8 +277,8 @@ void insert_instruction(int IC, const char *word) {
 void build_registers_instruction_line(char *source_register, char *target_register, int IC) {
     char word[WORD_SIZE + 1];
     char *word_p;
-    word_p = word;
     int source_register_number, target_register_number;
+    word_p = word;
     source_register_number = get_register_number(source_register);
     target_register_number = get_register_number(target_register);
     int_to_bin(source_register_number, word_p, REGISTER_BIT_SIZE);

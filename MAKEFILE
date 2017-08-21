@@ -1,41 +1,49 @@
+CC = gcc
+CFLAGS  = -c -Wall -ansi -pedantic
+
+all: assembler
+
 assembler: main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o
-	gcc -Wall -ansi -pedantic main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o -o assembler
+	$(CC) $(CFLAGS) main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o -o assembler
 
 main.o:	main.c
-	gcc -c -Wall -ansi -pedantic main.c -o main.o
+	$(CC) $(CFLAGS) main.c
 
-file_processing.o: file_processing.c
-	gcc -c -Wall -ansi -pedantic file_processing.c -o file_processing.o -I.
+file_processing.o: file_processing.c file_processing.h
+	$(CC) $(CFLAGS) file_processing.c 
 
-first_pass.o: first_pass.c
-	gcc -c -Wall -ansi -pedantic first_pass.c -o first_pass.o -I.
+first_pass.o: first_pass.c first_pass.h
+	$(CC) $(CFLAGS) first_pass.c  
 
-second_pass.o: second_pass.c
-	gcc -c -Wall -ansi -pedantic second_pass.c -o second_pass.o -I.
+second_pass.o: second_pass.c second_pass.h
+	$(CC) $(CFLAGS) second_pass.c  
 
-error_handling.o: errorHandler.c
-	gcc -c -Wall -ansi -pedantic error_handling.c -o error_handling.o -I.
+error_handling.o: error_handling.c error_handling.h
+	$(CC) $(CFLAGS) error_handling.c 
 
-symbols.o: symbols.c
-	gcc -c -Wall -ansi -pedantic symbols.c -o symbols.o -I.
+symbols.o: symbols.c symbols.h
+	$(CC) $(CFLAGS) symbols.c 
 
-data.o: data.c
-	gcc -c -Wall -ansi -pedantic data.c -o data.o -I.
+data.o: data.c data.h
+	$(CC) $(CFLAGS) data.c 
 
-entry_table.o: entry_table.c
-	gcc -c -Wall -ansi -pedantic entry_table.c -o entry_table.o -I.
+entry_table.o: entry_table.c entry_table.h
+	$(CC) $(CFLAGS) entry_table.c 
 
-opcode.o: opcode.c
-	gcc -c -Wall -ansi -pedantic opcode.c -o opcode.o -I.
+opcode.o: opcode.c opcode.h
+	$(CC) $(CFLAGS) opcode.c 
 
-extern_table.o: entry_table.c
-	gcc -c -Wall -ansi -pedantic extern_table.c -o extern_table.o -I.
+extern_table.o: extern_table.c extern_table.h
+	$(CC) $(CFLAGS) extern_table.c  
 
-utils.o: utils.c
-    gcc -c -Wall -ansi -pedantic utils.c -o utils.o -I.
+utils.o: utils.c utils.h
+	$(CC) $(CFLAGS) utils.c  
 
-directives.o: directives.c
-    gcc -c -Wall -ansi -pedantic directives.c -o directives.o -I.
+directives.o: directives.c directives.h
+	$(CC) $(CFLAGS) directives.c 
 
-keywords.o: keywords.o
-    gcc -c -Wall -ansi -pedantic keywords.c -o keywords.o -I
+keywords.o: keywords.c keywords.h
+	$(CC) $(CFLAGS) keywords.c 
+
+clean:
+	rm *.o

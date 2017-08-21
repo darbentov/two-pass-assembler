@@ -36,4 +36,5 @@
 #define REGISTER_BIT_SIZE 4
 #define REGISTER_NAME_LENGTH 2
 #define STRING_NULL_TERMINATOR '\0'
+#define SCANF_MATRIX_PATTERN "[%[^]]][%[^]]]"
 #endif

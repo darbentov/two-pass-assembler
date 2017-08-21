@@ -25,13 +25,13 @@ bool is_comment_or_empty(char *line) {
 
 
 int get_data_count_from_matrix_declaration(char *word, int line_number) {
+    int res, col, row;
     while (*word && *word != '[') {
         word++;
     }
     if (!*word || *word != '[') {
         return FALSE;
     }
-    int res, col, row;
     res = sscanf(word, "[%d][%d]", &col, &row);
     if (res != 2) {
         handle_error(INVALID_MATRIX_DECLARATION, line_number);
@@ -46,16 +46,16 @@ int get_data_count_from_matrix_declaration(char *word, int line_number) {
 }
 
 bool is_valid_matrix_for_instruction(char *word, int lines_count) {
+    int res;
+    char row_register[REGISTER_NAME_LENGTH + 1];
+    char col_register[REGISTER_NAME_LENGTH + 1];
     while (*word && *word != '[') {
         word++;
     }
     if (!*word || *word != '[') {
         return FALSE;
     }
-    int res;
-    char row_register[40];
-    char col_register[40];
-    res = sscanf(word, "[%[^]]][%[^]]]", row_register, col_register);
+    res = sscanf(word, SCANF_MATRIX_PATTERN, row_register, col_register);
 
     if (res == 2) {
         if (is_register(row_register) && is_register(col_register)) {
