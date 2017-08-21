@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "utils.h"
+#include "symbols.h"
 
 #ifndef ASSEMBLER_OPCODE_H
 #define ASSEMBLER_OPCODE_H
@@ -11,6 +12,11 @@
 #define MAX_IMMIDIATE_NUM 127
 #define MIN_IMMIDIATE_NUM -128
 #define MAX_INSTRUCTIONS_LINES 256
+
+#define SCANF_MATRIX_PATTERN "[%[^]]][ %[^]]]"
+#define MATRIX_ADDRESSING_WORDS_COUNT 2
+#define BOTH_REGISTERS_ADDRESSING_WORDS_COUNT 1
+#define IMMIDIATE_NUMBER_INDICATOR '#'
 
 typedef enum {
     IMMEDIATE_ADDRESSING, DIRECT_ADDRESSING, MATRIX_ADRESSING, REGISTER_ADDRESSING, NO_ADDRESSING
@@ -67,5 +73,23 @@ bool is_code_empty();
 void write_code_to_ob_file(FILE *fp);
 
 short int get_insrtuctions_count();
+
+void build_instruction_line(opcode_pt cur_opcode, addressing_t source_addressing, addressing_t target_addressing,
+                            int IC);
+
+void build_registers_instruction_line(char *source_register, char *target_register, int i);
+
+int
+build_operand_instruction_line(addressing_t addressing, char *operand, bool is_target_operand, int IC, int lines_count);
+
+void build_value_instruction_code(int value, coding_type_enum coding_type, int IC);
+
+void build_matrix_instruction_code(char *operand, int IC, int line_number);
+
+coding_type_enum get_coding_type_from_symbol(sym_pt symbol);
+
+void insert_instruction(int IC, const char *word);
+
+short int get_register_number(char *register_);
 
 #endif /* ASSEMBLER_OPCODE_H */

@@ -30,21 +30,6 @@ Opcode jsr = {"jsr", "1101", NULL, &g2};
 Opcode rts = {"rts", "1110", NULL, NULL};
 Opcode stop = {"stop", "1111", NULL, NULL};
 
-void build_instruction_line(opcode_pt cur_opcode, addressing_t source_addressing, addressing_t target_addressing,
-                            int IC);
-
-void build_registers_instruction_line(char *source_register, char *target_register, int i);
-
-int
-build_operand_instruction_line(addressing_t addressing, char *operand, bool is_target_operand, int IC, int lines_count);
-
-void build_value_instruction_code(int value, coding_type_enum coding_type, int IC);
-
-void build_matrix_instruction_code(char *operand, int IC, int line_number);
-
-coding_type_enum get_coding_type_from_symbol(sym_pt symbol);
-
-void insert_instruction(int IC, const char *word);
 
 int get_opcode_hash_index(char *name) {
     int sum;
@@ -121,7 +106,7 @@ addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfi
 
 addressing_t get_addressing_by_operand(char *operand, int lines_count) {
 
-    if (*operand == '#') {
+    if (*operand == IMMIDIATE_NUMBER_INDICATOR) {
         char *ptr;
         long num;
         operand++;
@@ -156,7 +141,7 @@ int get_words_count_by_single_addressing(addressing_t addressing) {
     if (addressing == NO_ADDRESSING) {
         return 0;
     } else if (addressing == MATRIX_ADRESSING) {
-        return 2;
+        return MATRIX_ADDRESSING_WORDS_COUNT;
     } else {
         return 1;
     }
@@ -164,7 +149,7 @@ int get_words_count_by_single_addressing(addressing_t addressing) {
 
 int get_words_count_by_both_addressings(addressing_t source_addressing, addressing_t target_addressing) {
     if (source_addressing == target_addressing && source_addressing == REGISTER_ADDRESSING) {
-        return 1;
+        return BOTH_REGISTERS_ADDRESSING_WORDS_COUNT;
     } else {
         return get_words_count_by_single_addressing(source_addressing) +
                get_words_count_by_single_addressing(target_addressing);
@@ -248,8 +233,8 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     char *word_p, *mat_name;
     word_p = operand;
     size_t i;
-    char row_register[3];
-    char col_register[3];
+    char row_register[REGISTER_NAME_LENGTH + 1];
+    char col_register[REGISTER_NAME_LENGTH + 1];
     i = 0;
     while (*word_p && *word_p != '[') {
         i++;
@@ -258,7 +243,7 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
 
     mat_name = strndup(operand, i);
     operand += i;
-    sscanf(operand, "[%[^]]][ %[^]]]", row_register, col_register);
+    sscanf(operand, SCANF_MATRIX_PATTERN, row_register, col_register);
     sym_pt symbol;
     symbol = search_symbol_by_label(mat_name);
     if (!symbol) {
@@ -272,7 +257,7 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
 }
 
 void build_value_instruction_code(int value, coding_type_enum coding_type, int IC) {
-    char word[WORD_SIZE];
+    char word[WORD_SIZE + 1];
     char *word_p;
     word_p = word;
     int_to_bin(value, word_p, 8);
@@ -290,36 +275,40 @@ void insert_instruction(int IC, const char *word) {
 }
 
 void build_registers_instruction_line(char *source_register, char *target_register, int IC) {
-    char word[WORD_SIZE];
+    char word[WORD_SIZE + 1];
     char *word_p;
     word_p = word;
     int source_register_number, target_register_number;
-    source_register_number = source_register ? (short int) (source_register[1] - '0') : (short int) 0;
-    target_register_number = target_register ? (short int) (target_register[1] - '0') : (short int) 0;
-    int_to_bin(source_register_number, word_p, 4);
-    word_p += 4;
-    int_to_bin(target_register_number, word_p, 4);
-    word_p += 4;
+    source_register_number = get_register_number(source_register);
+    target_register_number = get_register_number(target_register);
+    int_to_bin(source_register_number, word_p, REGISTER_BIT_SIZE);
+    word_p += REGISTER_BIT_SIZE;
+    int_to_bin(target_register_number, word_p, REGISTER_BIT_SIZE);
+    word_p += REGISTER_BIT_SIZE;
     int_to_bin(ABSOLUTE_CODING_TYPE, word_p, 2);
-    word_p += 2;
+    word_p += CODING_TYPE_BIT_SIZE;
     *word_p = '\0';
     insert_instruction(IC, word);
 
 }
 
+short int get_register_number(char *register_){
+    return register_ ? (short int) (register_[1] - '0') : (short int) 0;
+}
+
 void build_instruction_line(opcode_pt cur_opcode, addressing_t source_addressing, addressing_t target_addressing,
                             int IC) {
-    char word[WORD_SIZE];
+    char word[WORD_SIZE + 1];
     char *word_p;
     word_p = word;
     strcpy(word_p, cur_opcode->code);
-    word_p += 4;
-    int_to_bin(source_addressing, word_p, 2);
-    word_p += 2;
-    int_to_bin(target_addressing, word_p, 2);
-    word_p += 2;
-    int_to_bin(ABSOLUTE_CODING_TYPE, word_p, 2);
-    word_p += 2;
+    word_p += OPCODE_BITS_SIZE;
+    int_to_bin(source_addressing, word_p, ADDRESSING_BIT_SIZE);
+    word_p += ADDRESSING_BIT_SIZE;
+    int_to_bin(target_addressing, word_p, ADDRESSING_BIT_SIZE);
+    word_p += ADDRESSING_BIT_SIZE;
+    int_to_bin(ABSOLUTE_CODING_TYPE, word_p, CODING_TYPE_BIT_SIZE);
+    word_p += CODING_TYPE_BIT_SIZE;
     *word_p = '\0';
     insert_instruction(IC, word);
 
@@ -349,17 +338,17 @@ bool is_code_empty() {
 
 void write_code_to_ob_file(FILE *fp) {
     int i;
-    char address[9];
-    char address_4_base[5];
-    char value_4_base[6];
-    for (i = 0; i < 256; i++) {
+    char address[BITS_COUNT_OF_AN_INT + 1];
+    char address_4_base[(BITS_COUNT_OF_AN_INT / 2) + 1];
+    char value_4_base[(WORD_SIZE / 2) + 1];
+    for (i = 0; i < MAX_INSTRUCTIONS_LINES; i++) {
 
         if (!instructions[i]) {
             break;
         }
-        int_to_bin(i + START_IC, address, 8);
-        bin_to_4base(address, address_4_base, 8);
-        bin_to_4base(instructions[i], value_4_base, 10);
+        int_to_bin(i + START_IC, address, BITS_COUNT_OF_AN_INT);
+        bin_to_4base(address, address_4_base, BITS_COUNT_OF_AN_INT);
+        bin_to_4base(instructions[i], value_4_base, WORD_SIZE);
         fputs(address_4_base, fp);
         fputc(TAB_SEPERATOR, fp);
         fputs(value_4_base, fp);

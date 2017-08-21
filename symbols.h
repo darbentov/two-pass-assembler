@@ -18,9 +18,9 @@ typedef struct Symbol {
 
 sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_action);
 
-void insert_symbol(sym_pt new_node);
+void insert_symbol(char *label, int address, enum bool is_external, enum bool is_action);
 
-void insert_symbol_after_node(sym_pt new_node, sym_pt *head);
+void insert_symbol_after_node(sym_pt new_symbol, sym_pt *node);
 
 sym_pt search_symbol_by_label(char *label);
 
@@ -35,8 +35,6 @@ void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC);
 void clean_symbol_table();
 
 void clean_symbol_table_from_given_node(sym_pt symbol);
-
-void print_all_symbols();
 
 
 #endif

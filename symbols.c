@@ -1,15 +1,12 @@
 #include "first_pass.h"
 #include <ctype.h>
-#include "symbols.h"
 #include "constants.h"
 #include "keywords.h"
 #include "error_handling.h"
 
 static sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt head);
 
-static void print_all_symbols_from_given_node(sym_pt symbol);
-
-sym_pt symbol_head = NULL;
+static sym_pt symbol_head = NULL;
 
 sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_action) {
     sym_pt new_node;
@@ -24,18 +21,20 @@ sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_ac
     return new_node;
 }
 
-void insert_symbol(sym_pt new_node) {
+void insert_symbol(char *label, int address, enum bool is_external, enum bool is_action) {
+    sym_pt new_node;
+    new_node = create_symbol_node(label, address, is_external, is_action);
     insert_symbol_after_node(new_node, &symbol_head);
 }
 
-void insert_symbol_after_node(sym_pt new_node, sym_pt *head) {
+void insert_symbol_after_node(sym_pt new_symbol, sym_pt *node) {
     int strcmp_result;
-    if (!(*head)) {
-        *head = new_node;
-    } else if ((strcmp_result = strcmp(new_node->label, (*head)->label)) > 0) {
-        insert_symbol_after_node(new_node, &((*head)->right));
+    if (!(*node)) {
+        *node = new_symbol;
+    } else if ((strcmp_result = strcmp(new_symbol->label, (*node)->label)) > 0) {
+        insert_symbol_after_node(new_symbol, &((*node)->right));
     } else if (strcmp_result < 0) {
-        insert_symbol_after_node(new_node, &((*head)->left));
+        insert_symbol_after_node(new_symbol, &((*node)->left));
     }
 }
 
@@ -46,7 +45,7 @@ sym_pt search_symbol_by_label(char *label) {
 
 sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt node) {
     int strcmp_result;
-    if (node != 0) {
+    if (node) {
         if ((strcmp_result = strcmp(label, node->label)) == 0) {
             return node;
         } else if (strcmp_result > 0) {
@@ -55,7 +54,7 @@ sym_pt search_symbol_by_label_from_given_node(char *label, sym_pt node) {
             return search_symbol_by_label_from_given_node(label, node->left);
         }
     } else
-        return 0;
+        return NULL;
 }
 
 char *get_label(char *line, int lines_count) {
@@ -70,7 +69,7 @@ char *get_label(char *line, int lines_count) {
         return NULL;
     }
 
-    line[label_length] = 0;
+    line[label_length] = STRING_NULL_TERMINATOR;
     if (label_is_valid(line, label_length, lines_count)) {
         return line;
     }
@@ -120,11 +119,10 @@ void increment_symbol_addresses_by_ic_from_given_node(sym_pt symbol, int IC) {
     if (symbol) {
         if (!symbol->is_action && !symbol->is_external) {
             symbol->address += IC + START_IC;
-        }
-        else if (symbol->is_action){
+        } else if (symbol->is_action) {
             symbol->address += START_IC;
         }
-        increment_symbol_addresses_by_ic_from_given_node(symbol->right, IC );
+        increment_symbol_addresses_by_ic_from_given_node(symbol->right, IC);
         increment_symbol_addresses_by_ic_from_given_node(symbol->left, IC);
 
     }
@@ -143,17 +141,5 @@ void clean_symbol_table_from_given_node(sym_pt symbol) {
         symbol->right = NULL;
         symbol->left = NULL;
         free(symbol);
-    }
-}
-
-void print_all_symbols() {
-    print_all_symbols_from_given_node(symbol_head);
-}
-
-static void print_all_symbols_from_given_node(sym_pt symbol) {
-    if (symbol) {
-        printf("symbol: %s\n", symbol->label);
-        print_all_symbols_from_given_node(symbol->right);
-        print_all_symbols_from_given_node(symbol->left);
     }
 }

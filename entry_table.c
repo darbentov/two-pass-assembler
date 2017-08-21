@@ -6,46 +6,59 @@
 entry_pt entry_head = NULL;
 static short int entry_count;
 
+/* Insert entry to linked list */
 void insert_entry(char *label, int address) {
     entry_pt tmp;
     tmp = malloc(sizeof(Entry));
     check_allocation(tmp);
-
     tmp->label = strdup(label);
     tmp->address = address;
     tmp->next = NULL;
 
     if (!entry_head) {
-        /*make data_head point to temp*/
+        /* If entry linked list is empty, make the new node as the head of the linked list*/
         entry_head = tmp;
     }
-        /*if list is not empty*/
     else {
-        /*pointer to data_head*/
+        /* point to head of list, iterating through the list until the last node found */
         entry_pt p = entry_head;
-        /*make p point to last node*/
+
         while (p->next)
             p = p->next;
-        /*make tmp the last node*/
+
+        /* after the next node found, assign the new node to the next pointer */
         p->next = tmp;
     }
+
+    /* increment entry count, so we can get the count in O(1) */
     entry_count++;
 }
 
+/*** Clean entry table ***
+ *
+ * After the process of one file, the entry table needs to be cleaned for the next file processing
+ *
+ * */
 void clean_entry_table() {
     entry_pt ptr, tmp;
     ptr = entry_head;
-    if (!ptr)
-        return;
 
+    /* point to head of list, iterating through the list until the last node found
+     * free the memory taken by the current node in loop.
+     * */
     while (ptr) {
         tmp = ptr;
         ptr = ptr->next;
         free(tmp);
     }
+
     entry_head = NULL;
     entry_count = 0;
 }
+
+/*** Write Entry File
+ *
+ * */
 
 void write_entry_file(char *filename) {
     FILE *fp;

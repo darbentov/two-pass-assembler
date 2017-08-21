@@ -20,4 +20,6 @@ bool is_extern_empty();
 
 void write_extern_file(char *filename);
 
+void insert_extern_to_symbol_table(char *label, int line_number);
+
 #endif

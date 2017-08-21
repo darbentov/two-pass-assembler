@@ -1,5 +1,7 @@
+#include "first_pass.h"
 #include "extern_table.h"
 #include "constants.h"
+#include "symbols.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -61,4 +63,10 @@ void write_extern_file(char *filename) {
     }
     fclose(fp);
 
+}
+
+void insert_extern_to_symbol_table(char *label, int line_number) {
+    if (label_is_valid(label, strlen(label), line_number)) {
+        insert_symbol(label, 0, TRUE, FALSE);
+    }
 }

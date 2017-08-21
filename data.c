@@ -89,10 +89,8 @@ void insert_new_data(int *DC, short num) {/*create new pointer to data, allocate
 /*This function adds a string to the data list*/
 int insert_string_to_data(char *string, int line_number, int *DC) {
     char c;
+
     /* check if string is empty */
-    while (string && isspace(*string)) {
-        string++;
-    }
     if (!string) {
         handle_error(NO_STRING_ERROR, line_number);
         return BAD_EXIT_STATUS;
@@ -191,14 +189,14 @@ bool is_data_empty() {
 }
 
 void write_data_to_ob_file(FILE *fp) {
-    char word[WORD_SIZE];
+    char word[WORD_SIZE + 1];
     char address[9];
     char address_4_base[5];
     char value_4_base[6];
     Data_pt ptr = data_head;
     while (ptr) {
         int_to_bin(ptr->address, address, 8);
-        int_to_bin(ptr->value, word, WORD_SIZE - 1);
+        int_to_bin(ptr->value, word, WORD_SIZE);
         bin_to_4base(address, address_4_base, 8);
         bin_to_4base(word, value_4_base, 10);
         fputs(address_4_base, fp);

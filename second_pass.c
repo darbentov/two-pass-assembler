@@ -57,7 +57,7 @@ void second_pass(FILE *fp) {
         while (isspace(*line_p)) {
             line_p++;
         }
-        token = strtok(line_p, BLANK_CHARACTER_SEPERATOR);
+        token = strtok(line_p, BLANK_CHARACTER_SEPARATOR);
         if (!token || is_comment_or_empty(token))
             continue;
         process_line_second_pass(token, &IC);
@@ -66,7 +66,7 @@ void second_pass(FILE *fp) {
 
 void process_line_second_pass(char *token, int *IC_pt) {
     if (get_label(token, lines_count_second_pass)) {
-        token = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
+        token = strtok(NULL, BLANK_CHARACTER_SEPARATOR);
     }
     if (*token == '.') {
         token++;
@@ -105,7 +105,7 @@ void process_directive_second_pass(char *token) {
     int directive_type;
     sym_pt symbol;
     directive_type = find_directive_type(token);
-    token = strtok(NULL, BLANK_CHARACTER_SEPERATOR);
+    token = strtok(NULL, BLANK_CHARACTER_SEPARATOR);
 
     if (directive_type != ENTRY_DIRECTIVE_TYPE) {
         return;
