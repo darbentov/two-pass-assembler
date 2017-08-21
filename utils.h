@@ -21,4 +21,6 @@ FILE *open_file(char *filename, char *mode, char *extension);
 
 void bin_to_4base(char *src, char *dst, int length);
 
+char *my_strndup(char *src, size_t n);
+
 #endif

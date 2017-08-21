@@ -241,7 +241,7 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
         word_p++;
     }
 
-    mat_name = strndup(operand, i);
+    mat_name = my_strndup(operand, i);
     operand += i;
     sscanf(operand, SCANF_MATRIX_PATTERN, row_register, col_register);
     sym_pt symbol;
