@@ -14,8 +14,8 @@ int main(int argc, char **argv) {
     while (--argc) {
         process_file(*++argv);
         printf("\n");
-
     }
+    return 0;
 }
 
 
