@@ -118,7 +118,7 @@ void bin_to_4base(char *src, char *dst, int length) {
     }
     dst[length / 2] = 0;
 }
-/*duplicates string from 0 until n length*/
+/*duplicates string from 0 until n length */
 char *my_strndup(char *src, size_t n){
     char *new, *new_p;
     new = (char *)(malloc(sizeof(char) * n + 1));
