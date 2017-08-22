@@ -14,7 +14,7 @@ void check_allocation(void *ptr) {
         exit(0);
     }
 }
-
+/*checks if line is empty*/
 bool is_comment_or_empty(char *line) {
     char c;
     c = *line;
@@ -23,7 +23,7 @@ bool is_comment_or_empty(char *line) {
     return FALSE;
 }
 
-
+/*get matrix data by line*/
 int get_data_count_from_matrix_declaration(char *word, int line_number) {
     int res, col, row;
     while (*word && *word != '[') {
@@ -44,7 +44,7 @@ int get_data_count_from_matrix_declaration(char *word, int line_number) {
         return col * row;
     }
 }
-
+/*checks if matrix is valid*/
 bool is_valid_matrix_for_instruction(char *word, int lines_count) {
     int res;
     char row_register[REGISTER_NAME_LENGTH + 1];
@@ -68,7 +68,7 @@ bool is_valid_matrix_for_instruction(char *word, int lines_count) {
     }
     return FALSE;
 }
-
+/*make a number to represent bits*/
 void int_to_bin(int num, char *word_p, int bit_length) {
     unsigned int mask;
     int i;
@@ -96,7 +96,7 @@ FILE *open_file(char *filename, char *mode, char *extension) {
     /*Returns pointer to file*/
     return fp;
 }
-
+/*converts to abcd base*/
 void bin_to_4base(char *src, char *dst, int length) {
     int i;
     char zero;
@@ -118,7 +118,7 @@ void bin_to_4base(char *src, char *dst, int length) {
     }
     dst[length / 2] = 0;
 }
-
+/*duplicates string from 0 until n length*/
 char *my_strndup(char *src, size_t n){
     char *new, *new_p;
     new = (char *)(malloc(sizeof(char) * n + 1));
