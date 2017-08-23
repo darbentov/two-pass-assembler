@@ -8,22 +8,12 @@
 #define STRING_DIRECTIVE_TYPE 3
 #define ENTRY_DIRECTIVE_TYPE 4
 #define EXTERN_DIRECTIVE_TYPE 5
-typedef struct directive *directive_p;
 
 typedef struct directive {
     char *name;
     int type;
 } directive;
 
-static directive directives[] = {
-        {"data",   DATA_DIRECTIVE_TYPE},
-        {"mat",    MAT_DIRECTIVE_TYPE},
-        {"string", STRING_DIRECTIVE_TYPE},
-        {"entry",  ENTRY_DIRECTIVE_TYPE},
-        {"extern", EXTERN_DIRECTIVE_TYPE}
-};
-
-static int directive_count = 5;
 
 int find_directive_type(char *directive_name);
 

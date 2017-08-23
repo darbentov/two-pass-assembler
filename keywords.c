@@ -45,7 +45,7 @@ void insert_keyword(char *value, keyword_p *head) {
     int strcmp_result;
     if (!*head) {
         *head = (keyword_p) malloc(sizeof(Keyword));
-        (*head)->value = strdup(value);
+        (*head)->value = my_strdup(value);
         /* initialize the children to null */
         (*head)->left = 0;
         (*head)->right = 0;

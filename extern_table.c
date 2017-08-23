@@ -1,8 +1,6 @@
 #include "first_pass.h"
 #include "extern_table.h"
 #include "constants.h"
-#include "symbols.h"
-#include <stdlib.h>
 #include <string.h>
 
 static extern_pt extern_head = NULL;
@@ -12,7 +10,7 @@ static short int extern_count;
 void insert_extern(char *extern_label, int address) {
     extern_pt new, tmp;
     new = (extern_pt) (malloc(sizeof(ExternObj)));
-    new->label = strdup(extern_label);
+    new->label = my_strdup(extern_label);
     new->address = address;
     new->next = NULL;
     if (!extern_head) {

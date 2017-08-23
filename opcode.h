@@ -87,7 +87,7 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number);
 
 coding_type_enum get_coding_type_from_symbol(sym_pt symbol);
 
-void insert_instruction(int IC, const char *word);
+void insert_instruction(int IC, char *word);
 
 short int get_register_number(char *register_);
 

@@ -88,3 +88,10 @@ char *my_strndup(char *src, size_t n) {
     }
     return new;
 }
+
+/*duplicates string from 0 until n length */
+char *my_strdup(char *src) {
+    size_t n;
+    n = strlen(src);
+    return my_strndup(src, n);
+}

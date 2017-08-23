@@ -12,7 +12,7 @@ sym_pt create_symbol_node(char *label, int address, bool is_external, bool is_ac
     sym_pt new_node;
     new_node = (sym_pt) malloc(sizeof(Symbol));
     check_allocation(new_node);
-    new_node->label = strdup(label);
+    new_node->label = my_strdup(label);
     new_node->address = address;
     new_node->is_external = is_external;
     new_node->is_action = is_action;

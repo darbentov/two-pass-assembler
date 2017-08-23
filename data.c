@@ -369,7 +369,7 @@ char get_matrix_declaration_operand(char **mat_decleration_pt, int *target_opera
     c = **mat_decleration_pt; /* get first character */
     
     /* if c is not a number or '-' or '+' */
-    if (!isnumber(c) && c != '-' && c != '+'){
+    if (!isdigit(c) && c != '-' && c != '+'){
         *mat_decleration_pt+= 1;
         return c;
     }
@@ -384,7 +384,7 @@ char get_matrix_declaration_operand(char **mat_decleration_pt, int *target_opera
 
     }
     /* find whole number */
-    while (isnumber(c)){
+    while (isdigit(c)){
         *target_operand = (*target_operand * 10) + (c - '0');
         *mat_decleration_pt+= 1;
         c = **mat_decleration_pt; /* get the next character */

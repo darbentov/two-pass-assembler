@@ -1,10 +1,11 @@
 CC = gcc
 CFLAGS  = -c -Wall -ansi -pedantic
+OFLAGS  = -o -Wall -ansi -pedantic
 
 all: assembler
 
 assembler: main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o
-	$(CC) $(CFLAGS) main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o -o assembler
+	$(CC) $(OFLAGS) main.o file_processing.o first_pass.o second_pass.o error_handling.o symbols.o data.o entry_table.o opcode.o extern_table.o utils.o directives.o keywords.o -o assembler
 
 main.o:	main.c
 	$(CC) $(CFLAGS) main.c

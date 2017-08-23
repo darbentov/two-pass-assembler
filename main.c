@@ -3,7 +3,7 @@
 #include "opcode.h"
 #include "keywords.h"
 
-#define UASGE_MESSAGE "Usage: assemble an assembly code. by files provided in the terminal."
+#define UASGE_MESSAGE "Usage: assemble an assembly code. by files provided in the terminal.\n"
 
 int main(int argc, char **argv) {
     if (argc == 1) {

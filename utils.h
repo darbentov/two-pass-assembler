@@ -19,4 +19,5 @@ void bin_to_4base(char *src, char *dst, int length);
 
 char *my_strndup(char *src, size_t n);
 
+char *my_strdup(char *src);
 #endif

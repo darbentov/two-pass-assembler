@@ -193,7 +193,6 @@ int build_operand_instruction_line(addressing_t addressing, char *operand, bool 
     sym_pt symbol;
     int value;
     char *ptr;
-
     coding_type_enum coding_type;
     coding_type = ABSOLUTE_CODING_TYPE;
 
@@ -250,6 +249,7 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     char col_register[REGISTER_NAME_LENGTH + 1];
     sym_pt symbol;
     size_t i;
+    coding_type_enum coding_type;
     word_p = operand;
     i = 0;
     while (*word_p && *word_p != '[') {
@@ -265,7 +265,7 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
         handle_error(LABEL_DOES_NOT_EXIST_ERROR, line_number);
         return;
     }
-    coding_type_enum coding_type;
+
     coding_type = get_coding_type_from_symbol(symbol);
     build_value_instruction_code(symbol->address, coding_type, IC);
     build_registers_instruction_line(row_register, col_register, IC + 1);
@@ -284,8 +284,8 @@ void build_value_instruction_code(int value, coding_type_enum coding_type, int I
 
 }
 
-void insert_instruction(int IC, const char *word) {
-    instructions[IC] = strdup(word);
+void insert_instruction(int IC, char *word) {
+    instructions[IC] = my_strdup(word);
     instructions_count++;
 }
 

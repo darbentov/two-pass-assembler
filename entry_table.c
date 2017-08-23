@@ -1,7 +1,6 @@
 #include "entry_table.h"
 #include "constants.h"
 #include <stdlib.h>
-#include <string.h>
 
 entry_pt entry_head = NULL;
 static short int entry_count;
@@ -11,7 +10,7 @@ void insert_entry(char *label, int address) {
     entry_pt tmp;
     tmp = malloc(sizeof(Entry));
     check_allocation(tmp);
-    tmp->label = strdup(label);
+    tmp->label = my_strdup(label);
     tmp->address = address;
     tmp->next = NULL;
 
@@ -62,9 +61,9 @@ void clean_entry_table() {
 
 void write_entry_file(char *filename) {
     FILE *fp;
+    entry_pt tmp;
     char address[9], address_4_base[5];
     fp = open_file(filename, WRITE_MODE, ENTRY_EXTENSION);
-    entry_pt tmp;
     tmp = entry_head;
     while (tmp) {
         int_to_bin(tmp->address, address, 8);

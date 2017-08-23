@@ -1,6 +1,17 @@
 #include "directives.h"
 #include <string.h>
 
+static directive directives[] = {
+        {"data",   DATA_DIRECTIVE_TYPE},
+        {"mat",    MAT_DIRECTIVE_TYPE},
+        {"string", STRING_DIRECTIVE_TYPE},
+        {"entry",  ENTRY_DIRECTIVE_TYPE},
+        {"extern", EXTERN_DIRECTIVE_TYPE}
+};
+
+static int directive_count = 5;
+
+
 /*** Find the directive type by given directive name ***
  *
  *   If directive not found, return non-exists directive flag
