@@ -48,9 +48,9 @@ bool is_extern_empty() {
 
 void write_extern_file(char *filename) {
     FILE *fp;
+    extern_pt tmp;
     char address[9], address_4_base[5];
     fp = open_file(filename, WRITE_MODE, EXTERN_EXTENSION);
-    extern_pt tmp;
     tmp = extern_head;
     while (tmp) {
         int_to_bin(tmp->address, address, 8);

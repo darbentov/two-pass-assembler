@@ -246,10 +246,11 @@ coding_type_enum get_coding_type_from_symbol(sym_pt symbol) {
 
 void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     char *word_p, *mat_name;
-    size_t i;
-    word_p = operand;
     char row_register[REGISTER_NAME_LENGTH + 1];
     char col_register[REGISTER_NAME_LENGTH + 1];
+    sym_pt symbol;
+    size_t i;
+    word_p = operand;
     i = 0;
     while (*word_p && *word_p != '[') {
         i++;
@@ -259,7 +260,6 @@ void build_matrix_instruction_code(char *operand, int IC, int line_number) {
     mat_name = my_strndup(operand, i);
     operand += i;
     sscanf(operand, SCANF_MATRIX_PATTERN, row_register, col_register);
-    sym_pt symbol;
     symbol = search_symbol_by_label(mat_name);
     if (!symbol) {
         handle_error(LABEL_DOES_NOT_EXIST_ERROR, line_number);
