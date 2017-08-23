@@ -1,9 +1,18 @@
+#include "data.h"
 #include "opcode.h"
 #include "error_handling.h"
 #include "constants.h"
 #include "keywords.h"
 #include "extern_table.h"
 #include <ctype.h>
+
+
+#define DIMENSION_FOUND -1
+
+bool is_matrix_declaration_valid_for_instruction(char *matrix_declaration, int line_number);
+
+char find_dimension_or_bracket(char **matrix_declaration);
+
 
 static opcode_pt hash_table[OPCODES_COUNT] = {NULL};
 static char *instructions[MAX_INSTRUCTIONS_LINES];
@@ -105,7 +114,7 @@ addressing_t get_addressing_and_validate(char *operand, allowed_addressing_bitfi
 }
 
 addressing_t get_addressing_by_operand(char *operand, int lines_count) {
-
+    bool operand_check_result;
     if (*operand == IMMIDIATE_NUMBER_INDICATOR) {
         char *ptr;
         long num;
@@ -123,7 +132,13 @@ addressing_t get_addressing_by_operand(char *operand, int lines_count) {
     } else if (isalpha(*operand)) {
         if (is_register(operand)) {
             return REGISTER_ADDRESSING;
-        } else if (is_valid_matrix_for_instruction(operand, lines_count)) {
+        } else if ((operand_check_result = is_matrix_declaration_valid_for_instruction(operand, lines_count))) {
+            if (operand_check_result == FATAL_FALSE){
+                return NO_ADDRESSING;
+            }
+            if (are_matrix_dimensions_registers(operand, lines_count)) {
+                return NO_ADDRESSING;
+            }
             return MATRIX_ADRESSING;
         } else if (label_is_valid(operand, strlen(operand), lines_count)) {
             return DIRECT_ADDRESSING;
@@ -292,7 +307,7 @@ void build_registers_instruction_line(char *source_register, char *target_regist
 
 }
 
-short int get_register_number(char *register_){
+short int get_register_number(char *register_) {
     return register_ ? (short int) (register_[1] - '0') : (short int) 0;
 }
 
@@ -358,4 +373,137 @@ void write_code_to_ob_file(FILE *fp) {
 
 short int get_insrtuctions_count() {
     return instructions_count;
+}
+
+/*checks if matrix is valid*/
+bool are_matrix_dimensions_registers(char *word, int lines_count) {
+    int res;
+    char row_register[REGISTER_NAME_LENGTH + 1];
+    char col_register[REGISTER_NAME_LENGTH + 1];
+    while (*word && *word != '[') {
+        word++;
+    }
+    if (!*word || *word != '[') {
+        return FALSE;
+    }
+    res = sscanf(word, SCANF_MATRIX_PATTERN, row_register, col_register);
+
+    if (res == 2) {
+        if (is_register(row_register) && is_register(col_register)) {
+            return TRUE;
+        } else {
+            handle_error(MATRIX_INDEX_MUST_BE_REGISTERS_ERROR, lines_count);
+            return FALSE;
+        }
+
+    }
+    return FALSE;
+}
+
+
+/* Get count from matrix declaration
+ *
+ * Iterating the string of matrix declaration and find the pattern of '[row][col]'
+ *
+ * Rules:
+ * 1. Only alnum character are allowed between brackets.
+ * 2. No spaces are allowed
+ * */
+bool is_matrix_declaration_valid_for_instruction(char *matrix_declaration, int line_number) {
+    int status;
+    char c;
+    status = BEGINING;
+
+    while (*matrix_declaration && *matrix_declaration != '[') {
+        matrix_declaration++;
+    }
+    if (!*matrix_declaration || *matrix_declaration != '[') {
+        return FALSE;
+    }
+    /* getting operands in a loop
+     *
+     * Expected operands:
+     * 1. '['
+     * 2. ']'
+     * 3. a register
+     * */
+    while ((c = find_dimension_or_bracket(&matrix_declaration))) {
+        switch (c) {
+            case OPENING_BRACKET:
+                if (status == BEGINING) {
+                    /* the scan got the first '[' character */
+                    status = AFTER_FIRST_OPENING_BRACKET;
+                } else if (status == AFTER_FIRST_CLOSING_BRACKET) {
+                    /* the scan got the second '[' character */
+                    status = AFTER_SECOND_OPENING_BRACKET;
+
+                } else {
+                    handle_error(INVALID_MATRIX_DECLARATION, line_number);
+                    return FATAL_FALSE;
+                }
+                break;
+            case CLOSING_BRACKET:
+                if (status == AFTER_ROW_DIMENSION) {
+                    status = AFTER_FIRST_CLOSING_BRACKET;
+                    /* spaces are not allowed between the row and col declaration */
+                } else if (status == AFTER_COL_DIMENSION) {
+                    status = AFTER_SECOND_CLOSING_BRACKET;
+                    /* after the scan got both dimensions, set the 'is_skip_spaces' to FALSE,
+                     * to complete the scan of the matrix dimensions */
+                } else {
+                    /* if closing bracket is not after a number, it is an error */
+                    handle_error(INVALID_MATRIX_DECLARATION, line_number);
+                    return FATAL_FALSE;
+                }
+                break;
+            case DIMENSION_FOUND:
+                /* if a number was found */
+                if (status == AFTER_FIRST_OPENING_BRACKET) {
+                    status = AFTER_ROW_DIMENSION;
+                } else if (status == AFTER_SECOND_OPENING_BRACKET) {
+                    status = AFTER_COL_DIMENSION;
+                } else {
+                    /* if a number found not after an opening bracket, is it an error */
+                    handle_error(SYNTAX_ERROR, line_number);
+                    return FATAL_FALSE;
+                }
+                break;
+            default:
+                /* if the scanner found unexpected characters, is it an error */
+                handle_error(SYNTAX_ERROR, line_number);
+                return FATAL_FALSE;
+        }
+    }
+    if (status == AFTER_ROW_DIMENSION || status == AFTER_COL_DIMENSION){
+        handle_error(SYNTAX_ERROR, line_number);
+        return FATAL_FALSE;
+    }
+    /* if the scanner has not got to the second closing bracket, it means that the matrix declaration is not valid */
+    if (status != AFTER_SECOND_CLOSING_BRACKET) {
+        handle_error(MISSING_COLUMN_DIMENSION, line_number);
+        return FATAL_FALSE;
+    }
+    return TRUE;
+}
+
+char find_dimension_or_bracket(char **matrix_declaration) {
+    char c;
+    c = **matrix_declaration; /* get first character */
+    *matrix_declaration+=1;
+
+    /* if c is not an alphanum character, it is sure not the beginning of a register name */
+    if (!isalnum(c)) {
+        return c;
+    }
+    /* go back to the last character, so we can scan the whole dimension */
+    *matrix_declaration-=1;
+
+    /* skipping the whole dimension */
+    while (isalnum(c)){
+        *matrix_declaration+=1;
+        c = **matrix_declaration;
+
+    }
+    return DIMENSION_FOUND;
+
 }

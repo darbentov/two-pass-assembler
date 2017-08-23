@@ -1,8 +1,9 @@
+#include <ctype.h>
+#include <stdio.h>
 #include "data.h"
 #include "constants.h"
 #include "symbols.h"
 #include "keywords.h"
-#include "error_handling.h"
 
 void int_to_bin(int num, char *word_p, int bit_length);
 
@@ -14,6 +15,7 @@ void check_allocation(void *ptr) {
         exit(0);
     }
 }
+
 /*checks if line is empty*/
 bool is_comment_or_empty(char *line) {
     char c;
@@ -23,51 +25,7 @@ bool is_comment_or_empty(char *line) {
     return FALSE;
 }
 
-/*get matrix data by line*/
-int get_data_count_from_matrix_declaration(char *word, int line_number) {
-    int res, col, row;
-    while (*word && *word != '[') {
-        word++;
-    }
-    if (!*word || *word != '[') {
-        return FALSE;
-    }
-    res = sscanf(word, "[%d][%d]", &col, &row);
-    if (res != 2) {
-        handle_error(INVALID_MATRIX_DECLARATION, line_number);
-        return 0;
-    }
-    if (row <= 0 || col <= 0) {
-        handle_error(NEGTIVE_INDEX_MATRIX_DECLARATION_ERROR, line_number);
-        return 0;
-    } else {
-        return col * row;
-    }
-}
-/*checks if matrix is valid*/
-bool is_valid_matrix_for_instruction(char *word, int lines_count) {
-    int res;
-    char row_register[REGISTER_NAME_LENGTH + 1];
-    char col_register[REGISTER_NAME_LENGTH + 1];
-    while (*word && *word != '[') {
-        word++;
-    }
-    if (!*word || *word != '[') {
-        return FALSE;
-    }
-    res = sscanf(word, SCANF_MATRIX_PATTERN, row_register, col_register);
 
-    if (res == 2) {
-        if (is_register(row_register) && is_register(col_register)) {
-            return TRUE;
-        } else {
-            handle_error(MATRIX_INDEX_MUST_BE_REGISTERS_ERROR, lines_count);
-            return FALSE;
-        }
-
-    }
-    return FALSE;
-}
 /*make a number to represent bits*/
 void int_to_bin(int num, char *word_p, int bit_length) {
     unsigned int mask;
@@ -96,6 +54,7 @@ FILE *open_file(char *filename, char *mode, char *extension) {
     /*Returns pointer to file*/
     return fp;
 }
+
 /*converts to abcd base*/
 void bin_to_4base(char *src, char *dst, int length) {
     int i;
@@ -110,20 +69,21 @@ void bin_to_4base(char *src, char *dst, int length) {
             dst[((length - i) / 2) - 1] = 'a';
         } else if (strcmp(cur, "01") == 0) {
             dst[((length - i) / 2) - 1] = 'b';
-        } else if (strcmp(cur,"10") == 0) {
-            dst[((length - i)/2) - 1] = 'c';
+        } else if (strcmp(cur, "10") == 0) {
+            dst[((length - i) / 2) - 1] = 'c';
         } else {
-            dst[((length - i)/2) - 1] = 'd';
+            dst[((length - i) / 2) - 1] = 'd';
         }
     }
     dst[length / 2] = 0;
 }
+
 /*duplicates string from 0 until n length */
-char *my_strndup(char *src, size_t n){
+char *my_strndup(char *src, size_t n) {
     char *new, *new_p;
-    new = (char *)(malloc(sizeof(char) * n + 1));
+    new = (char *) (malloc(sizeof(char) * n + 1));
     new_p = new;
-    while (src && n--){
+    while (src && n--) {
         *new_p++ = *src++;
     }
     return new;

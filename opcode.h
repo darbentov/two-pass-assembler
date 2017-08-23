@@ -91,4 +91,6 @@ void insert_instruction(int IC, const char *word);
 
 short int get_register_number(char *register_);
 
+bool are_matrix_dimensions_registers(char *word, int lines_count);
+
 #endif /* ASSEMBLER_OPCODE_H */

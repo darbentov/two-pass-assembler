@@ -145,6 +145,7 @@ void process_line_first_pass(char *line, int *DC, int *IC) {
 
 void process_directive_first_pass(char *token, int is_label, int *DC) {
     int directive_type;
+    char *operands;
     enum bool is_action = FALSE;
     enum bool is_external = FALSE;
 
@@ -164,33 +165,39 @@ void process_directive_first_pass(char *token, int is_label, int *DC) {
     if (directive_type == ENTRY_DIRECTIVE_TYPE) {
         return;
     }
-        /* If directive type is .extern, the operand of the directive is the label for the extern */
-    else if (directive_type == EXTERN_DIRECTIVE_TYPE) {
-        token = strtok(NULL, BLANK_CHARACTER_SEPARATOR); /* get next token of line */
-        insert_extern_to_symbol_table(token, lines_count_first_pass);
-    }
-        /* If the directive type is one of the data directives, process it */
-    else {
-        /* If is_label flag is turned on, insert it to the Symbol tree with the current DC */
-        if (is_label) {
-            insert_symbol(label, *DC, is_external, is_action);
-        }
 
-        if (directive_type == DATA_DIRECTIVE_TYPE) {
-            token = strtok(NULL, COMMA_AND_BLANK_SPACE_DELIMITER); /* get the next token of line */
-            insert_numbers_to_data(token, lines_count_first_pass, DC);
-        } else if (directive_type == STRING_DIRECTIVE_TYPE) {
-            token = strtok(NULL, EMPTY_DELIMITER);
-            /* string may contain comma or any blank character,
-             * therefore we only skipping to next token with no delimiter,
-             * and we skip the blank characters at the start of the token*/
-            while (token && isspace(*token)) {
-                token++;
+    else {
+        /* If directive type is .extern, the operand of the directive is the label for the extern */
+        if (directive_type == EXTERN_DIRECTIVE_TYPE) {
+            operands = strtok(NULL, BLANK_CHARACTER_SEPARATOR);
+            insert_extern_to_symbol_table(operands, lines_count_first_pass);
+            /* check for redundant operand */
+            operands = strtok(NULL, BLANK_CHARACTER_SEPARATOR);
+            if (operands){
+                handle_error(EXTRA_OPERANDS_AFTER_EXTERN_DIRECITVE, lines_count_first_pass);
             }
-            insert_string_to_data(token, lines_count_first_pass, DC);
-        } else if (directive_type == MAT_DIRECTIVE_TYPE) {
-            token = strtok(NULL, COMMA_AND_BLANK_SPACE_DELIMITER); /* get the next token of line */
-            insert_matrix_to_data(token, lines_count_first_pass, DC);
+        }
+        /* If the directive type is one of the data directives, process it */
+        else {
+            /* get the rest of the line after directive */
+            operands = strtok(NULL, EMPTY_DELIMITER);
+
+            /* skip spaces*/
+            while (operands && isspace(*operands)) {
+                operands++;
+            }
+            /* If is_label flag is turned on, insert it to the Symbol tree with the current DC */
+            if (is_label) {
+                insert_symbol(label, *DC, is_external, is_action);
+            }
+
+            if (directive_type == DATA_DIRECTIVE_TYPE) {
+                insert_numbers_to_data(operands, lines_count_first_pass, DC);
+            } else if (directive_type == STRING_DIRECTIVE_TYPE) {
+                insert_string_to_data(operands, lines_count_first_pass, DC);
+            } else if (directive_type == MAT_DIRECTIVE_TYPE) {
+                insert_matrix_to_data(operands, lines_count_first_pass, DC);
+            }
         }
     }
 
