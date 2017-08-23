@@ -86,6 +86,7 @@ char *my_strndup(char *src, size_t n) {
     while (src && n--) {
         *new_p++ = *src++;
     }
+    *new_p = 0;
     return new;
 }
 

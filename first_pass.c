@@ -62,6 +62,7 @@ void first_pass(FILE *fp) {
     int IC, DC;
     IC = DC = 0;
     lines_count_first_pass = 0;
+    label = NULL;
 
     while (fgets(line, MAX_CODE_LINE, fp)) {
         lines_count_first_pass++;

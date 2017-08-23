@@ -18,7 +18,7 @@ void process_directive_second_pass(char *token);
 
 void process_instruction_second_pass(char *token, int *IC_pt);
 
-char label[MAX_LABEL];
+char *label;
 
 /*
  * Second Pass Algorithm
@@ -51,6 +51,7 @@ void second_pass(FILE *fp) {
     int IC;
     IC = 0;
     lines_count_second_pass = 0;
+    label = NULL;
     while (fgets(line, MAX_CODE_LINE, fp)) {
         lines_count_second_pass++;
         line_p = line;
